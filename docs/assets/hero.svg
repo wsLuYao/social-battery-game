@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="420" viewBox="0 0 1440 420" role="img" aria-labelledby="title desc">
+  <title id="title">你的社交电池，电量还剩几格？</title>
+  <desc id="desc">米黄色底色上的像素电池与校园夜色，介绍一款探索社交节奏的网页小游戏。</desc>
+  <rect width="1440" height="420" rx="20" fill="#ece2bf"/>
+  <path d="M0 330H1440V420H0Z" fill="#d5d8ae"/>
+  <path d="M0 355H1440V420H0Z" fill="#b8c396"/>
+  <g fill="#96a573" opacity=".7"><path d="M0 340h32v-18h28v33h42v-24h28v32h52v-15h30v25H0Z"/><path d="M1200 354h40v-28h24v21h42v-16h35v24h44v-33h25v28h30v70h-240Z"/></g>
+  <g font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#405038">
+    <text x="70" y="77" font-size="19" letter-spacing="5" fill="#7b865f">SOCIAL BATTERY · PIXEL CAMPUS</text>
+    <text x="67" y="164" font-size="56" font-weight="700">你的社交电池</text>
+    <text x="67" y="238" font-size="56" font-weight="700">电量还剩几格？</text>
+    <text x="71" y="294" font-size="22" fill="#697452">用 5—10 分钟，走过属于你的这一晚。</text>
+    <text x="71" y="377" font-size="17" fill="#4c6042">校园聚会  /  从容离场  /  宿舍充电  /  今晚的充电小票</text>
+  </g>
+  <g shape-rendering="crispEdges">
+    <path d="M987 105h280v20h20v28h22v90h-22v28h-20v20H987v-20h-20V125h20Z" fill="#4d6044"/>
+    <path d="M990 128h274v140H990Z" fill="#faf4dd"/>
+    <path d="M1008 148h44v100h-44Z" fill="#8ca76b"/><path d="M1067 148h44v100h-44Z" fill="#8ca76b"/><path d="M1126 148h44v100h-44Z" fill="#a5b87c"/><path d="M1185 148h44v100h-44Z" fill="#e1d7ad"/>
+    <path d="M1230 44h12v12h-12ZM1221 53h30v9h-30ZM922 273h12v12h-12ZM913 282h30v9h-30Z" fill="#9aa574"/>
+    <path d="M1309 70h7v7h-7ZM1344 282h7v7h-7ZM936 76h7v7h-7Z" fill="#b59c67"/>
+  </g>
+  <text x="1129" y="330" text-anchor="middle" font-family="monospace" font-size="17" letter-spacing="3" fill="#596d48">A LITTLE ROOM TO RECHARGE</text>
+</svg>

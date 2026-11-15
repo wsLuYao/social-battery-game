@@ -1,0 +1,937 @@
+:root{
+    --ink: #46353c;
+    --cream: #f7e4bb;
+    --sage: #9eb78b;
+    --border: #78513d;
+    --sprite: none;
+    --game-w: 100vw;
+    --game-h: 100dvh
+}
+*{
+    box-sizing: border-box
+}
+html,
+body{
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #252633;
+    color: var(--ink);
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif
+}
+button,
+input,
+select{
+    font: inherit
+}
+button{
+    cursor: pointer;
+    color: inherit;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent
+}
+button:disabled{
+    cursor: not-allowed;
+    opacity: .52
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{
+    outline: 3px solid #78906b;
+    outline-offset: 3px
+}
+button:active{
+    filter: brightness(.97)
+}
+[hidden]{
+    display: none !important
+}
+#app{
+    position: relative;
+    width: var(--game-w);
+    height: var(--game-h);
+    isolation: isolate;
+    overflow: hidden;
+    touch-action: none
+}
+#app.is-rotated{
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%)
+}
+.primary{
+    background: #9eb78b;
+    border: 3px solid #425f46;
+    box-shadow: inset 0 0 0 2px #cbdbac, 0 3px #34472f;
+    color: #2e4638;
+    font-weight: 800;
+    padding: 11px 20px;
+    min-height: 46px;
+    border-radius: 2px
+}
+.primary:hover{
+    background: #b5ca9d
+}
+#cover{
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: min(5%, 54px);
+    padding: 35px 6%;
+    background: linear-gradient(90deg, #282632fa, #282632d9 50%, #28263280);
+    color: #ffedc7;
+    overflow: auto;
+    touch-action: pan-y
+}
+.cover-inner{
+    max-width: 530px
+}
+.cover-roles{
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: min(38vw, 50vh, 520px);
+    padding: 14px;
+    background: linear-gradient(#fffaf0, #f4e4c7);
+    border: 4px solid #d9c098;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 3px #fffdf6, 0 18px 30px #12111f66;
+    color: #6b4f3a;
+    transform: rotate(-1.4deg)
+}
+.role-card-head{
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 2px 4px 10px;
+    border-bottom: 2px dashed #cdb38c
+}
+.role-card-head span{
+    font-size: 13px;
+    letter-spacing: .2em;
+    color: #97b07f;
+    font-weight: 700
+}
+.role-card-head b{
+    font-size: 24px;
+    line-height: 1.35;
+    color: #463a30
+}
+.role-grid{
+    display: grid;
+    gap: 8px
+}
+.role-grid-cover{
+    flex: 1;
+    grid-template-columns: repeat(3, 1fr);
+    align-content: space-evenly;
+    gap: 10px;
+    margin: 12px 0
+}
+.role-grid-modal{
+    grid-template-columns: repeat(3, 1fr);
+    margin: 14px 0
+}
+.role-face{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    aspect-ratio: 1;
+    background: #efe3c6;
+    border: 2px solid #ddc7a1;
+    border-radius: 10px;
+    transition: transform .15s, box-shadow .15s, border-color .15s, background .15s
+}
+.role-face img{
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    image-rendering: pixelated
+}
+.role-face.locked{
+    background: #ece1c8;
+    border-color: #ddc7a1;
+    box-shadow: inset 0 0 0 2px #f4ead4
+}
+.role-face.unlocked{
+    background: #eef3d5;
+    border-color: #93a874;
+    box-shadow: inset 0 0 0 2px #faf8e4, 0 0 0 2px #c8d6a6
+}
+.role-face.unlocked:hover{
+    transform: translateY(-2px)
+}
+.role-face.current{
+    background: #e1ecbf;
+    border-color: #6f8a55;
+    box-shadow: inset 0 0 0 2px #f7f2cf, 0 0 0 3px #a9bd8659
+}
+.role-tile{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 8px 10px;
+    background: #fbf1d8;
+    border: 2px solid #d8c19a;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform .15s, box-shadow .15s
+}
+.role-tile.unlocked:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 #d8c19a
+}
+.role-tile em{
+    font-style: normal;
+    font-size: 9px;
+    letter-spacing: .04em;
+    color: #8fa276
+}
+.role-tile .role-art{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58%;
+    aspect-ratio: 1;
+    margin: 2px 0
+}
+.role-tile .role-art img{
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated
+}
+.role-tile strong{
+    font-size: 12px;
+    line-height: 1.35;
+    color: #4a3b31
+}
+.role-tile small{
+    font-size: 9.5px;
+    line-height: 1.5;
+    color: #94795c
+}
+.role-tile.current{
+    border-color: #7f9a63;
+    background: #eef0d3;
+    box-shadow: inset 0 0 0 3px #f7f2cf
+}
+.role-tile.locked{
+    background: #efe5cd;
+    border-style: dashed;
+    border-color: #c9b696;
+    cursor: not-allowed
+}
+.role-tile.locked strong{
+    color: #a08a6d
+}
+.role-lock{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44%;
+    aspect-ratio: 1;
+    margin: 2px 0;
+    border: 2px dashed #c9b696;
+    border-radius: 50%;
+    font: 800 22px monospace;
+    color: #b7a281
+}
+.role-card-foot{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 4px 2px;
+    border-top: 2px dashed #cdb38c;
+    font-size: 10.5px;
+    color: #866a4f
+}
+.role-card-foot b{
+    font-size: 14px;
+    color: #5f7a4a
+}
+.role-card-foot small{
+    font-size: 9.5px;
+    text-align: right;
+    color: #a08a6d
+}
+.role-detail{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 0
+}
+.role-detail .role-art.large{
+    flex: 0 0 auto;
+    width: 132px;
+    height: 132px
+}
+.role-detail .role-art.large img{
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated
+}
+.role-quote{
+    font-size: 16px !important;
+    color: #4f5f3f;
+    margin: 0 0 8px !important
+}
+.role-detail-copy .note{
+    margin: 0 !important
+}
+.role-port{
+    margin-top: 6px;
+    padding: 12px 16px;
+    background: #e9ddb5;
+    border-radius: 6px
+}
+.role-port small{
+    display: block;
+    font-size: 11px;
+    color: #7d6a4c
+}
+.role-port strong{
+    display: block;
+    font-size: 15px;
+    margin: 2px 0 10px;
+    color: #4f4135
+}
+.role-port p{
+    font-size: 13px !important;
+    margin: 2px 0 0 !important
+}
+.eyebrow{
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #c5b194;
+    margin-bottom: 17px
+}
+.tagline{
+    font-size: 24px;
+    font-weight: 700;
+    margin: 18px 0
+}
+.cover-meta{
+    display: flex;
+    gap: 13px;
+    font-size: 11px;
+    color: #d9c3a3
+}
+.cover-meta span{
+    border-left: 2px solid #b69c73;
+    padding-left: 8px
+}
+.setup{
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin: 22px 0 18px
+}
+.avatars{
+    display: flex;
+    gap: 10px
+}
+.avatar{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 160px;
+    padding: 0;
+    border: 2px solid #776a64;
+    background: #36323e;
+    color: #d9c3a3
+}
+.avatar.selected{
+    border-color: #c9bb89;
+    background: #676051
+}
+.avatar span{
+    position: absolute;
+    bottom: 3px;
+    font-size: 18px;
+    font-weight: 700
+}
+.sprite{
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    background-image: var(--sprite);
+    background-size: 400% 300%;
+    image-rendering: pixelated;
+    flex-shrink: 0
+    
+}
+.face0{
+    background-position: 1.9% 0
+}
+.face1{
+    background-position: 1.6% 50%
+}
+.face2{
+    background-position: 2.1% 100%
+}
+.start{
+    display: block;
+    text-align: left;
+    width: 100%;
+    min-width: 300px;
+    font-size: 18px;
+    font-weight: 700
+}
+.cover-row{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px
+}
+.cover-links{
+    display: flex;
+    gap: 10px;
+    margin-top: 0
+}
+.cover-links button{
+    background: #efd5a7;
+    border: 2px solid #92704f;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px #fff0c6, 0 3px #6b5238;
+    color: #4a3b30;
+    font-size: 18px;
+    font-weight: 700;
+    min-height: 46px;
+    padding: 8px 18px;
+    text-decoration: none
+}
+.cover-links button:hover{
+    background: #fff0c9
+}
+.cover-links button:active{
+    transform: translateY(2px);
+    box-shadow: inset 0 0 0 2px #fff0c6, 0 1px #6b5238
+}
+.cover-note{
+    font-size: 10px;
+    line-height: 1.8;
+    color: #bba98f;
+    margin: 9px 0 0
+}
+.cover-inner #startBtn.new-game{
+    width: fit-content;
+    min-width: 0;
+    min-height: 46px;
+    padding: 8px 16px;
+    background: #efd5a7;
+    border: 2px solid #92704f;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px #fff0c6, 0 3px #6b5238;
+    color: #4a3b30;
+    text-decoration: none
+}
+.cover-inner #startBtn.new-game:hover{
+    background: #fff0c9
+}
+.cover-inner #startBtn.new-game:active{
+    transform: translateY(2px);
+    box-shadow: inset 0 0 0 2px #fff0c6, 0 1px #6b5238
+}
+.cover-row.has-save{
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+}
+.cover-row.has-save #startBtn.new-game{
+    width: 100%;
+    min-width: 0;
+    text-align: center
+}
+.cover-row.has-save .cover-links{
+    min-width: 0
+}
+.cover-row.has-save .cover-links button{
+    width: 100%
+}
+#report .report-actions>.primary{
+    min-width: 180px
+}
+#rotateHint{
+    position: absolute;
+    z-index: 60;
+    inset: 0;
+    background: #292736f5;
+    color: #f7e4bf;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px
+}
+#rotateHint h2{
+    font-size: 25px;
+    margin: 15px 0
+}
+#rotateHint p{
+    font-size: 13px;
+    line-height: 1.9;
+    color: #d2bfa0
+}
+#rotateHint button{
+    margin: 15px 0
+}
+.compact #cover{
+    padding: 12px 6%;
+    gap: 6%;
+    align-items: center
+}
+.compact .cover-roles{
+    width: min(35vw, 55vh, 340px);
+    padding: 9px;
+    border-width: 3px;
+    border-radius: 12px
+}
+.compact .role-card-head{
+    padding-bottom: 6px
+}
+.compact .role-card-head span{
+    font-size: 11px
+}
+.compact .role-card-head b{
+    font-size: 18px
+}
+.compact .role-grid{
+    gap: 5px
+}
+.compact .role-grid-cover{
+    margin: 6px 0;
+    gap: 5px
+}
+.compact .role-face{
+    padding: 4px;
+    border-radius: 8px
+}
+.compact .role-tile{
+    padding: 5px 5px 6px;
+    border-radius: 8px
+}
+.compact .role-tile em{
+    font-size: 8px
+}
+.compact .role-tile strong{
+    font-size: 10px
+}
+.compact .role-tile small{
+    display: none
+}
+.compact .role-card-foot{
+    padding: 5px 2px 0;
+    font-size: 9px
+}
+.compact .role-card-foot small{
+    display: none
+}
+.compact .cover-inner{
+    max-width: 345px
+}
+.compact .eyebrow{
+    font-size: 8px;
+    margin-bottom: 7px
+}
+.compact .tagline{
+    font-size: 11px;
+    margin: 9px 0
+}
+.compact .cover-meta{
+    font-size: 9px
+}
+.compact .setup{
+    margin: 10px 0;
+    gap: 17px
+}
+.compact .avatar{
+    width: 46px;
+    height: 57px
+}
+.compact .avatar .sprite{
+    width: 52px;
+    height: 52px
+}
+.compact .avatar span{
+    font-size: 8px
+}
+.compact .start{
+    font-size: 18px;
+    font-weight: 700;
+    min-height: 43px;
+    min-width: 0;
+    padding: 8px 13px
+}
+.compact .cover-row{
+    gap: 8px
+}
+.compact .cover-links{
+    gap: 8px
+}
+.compact .cover-links button{
+    font-size: 18px;
+    font-weight: 700;
+    min-height: 40px;
+    padding: 5px 12px
+}
+.compact .cover-note{
+    font-size: 8px;
+    line-height: 1.6;
+    margin-top: 3px
+}
+.compact .role-grid-modal{
+    gap: 6px
+}
+.compact .role-grid-modal .role-tile{
+    padding: 6px
+}
+#app.report-stacked #report .report-actions>.primary{
+    width: 100%
+}
+.narrow #cover{
+    gap: 4%;
+    padding: 10px 4%
+}
+.narrow .cover-roles{
+    width: min(31vw, 50vh, 260px)
+}
+.narrow .cover-inner{
+    max-width: 300px
+}
+.narrow .tagline{
+    font-size: 10px
+}
+@media(prefers-reduced-motion:reduce){*{
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important
+    }
+}
+.dorm-playlist-foot .primary,
+.dorm-playlist-foot .secondary{
+    min-height: 44px;
+    padding: 5px 12px;
+    font-size: 11px
+}
+.dorm-snack-foot .primary,
+.dorm-snack-foot .secondary{
+    min-height: 44px;
+    padding: 5px 12px;
+    font-size: 11px
+}
+#app.mobile-landscape #cover,
+#app.mobile-landscape .dialog,
+#app.mobile-landscape .vn-dialog,
+#app.mobile-landscape .vn-options,
+#app.mobile-landscape .report-reading,
+#app.mobile-landscape .report-dialog,
+#app.mobile-landscape #report{
+    touch-action: pan-y
+}
+#app.mobile-landscape #cover{
+    display: grid;
+    grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+    align-items: center;
+    gap: 14px;
+    /* 手机横屏也要给标题留出呼吸空间：左右 18–30px，上下 12–18px。 */
+    padding: calc(var(--ui-safe-top) + clamp(12px, calc(var(--game-h, 360px) * .034), 18px)) calc(var(--ui-safe-right) + clamp(18px, calc(var(--game-w, 740px) * .036), 30px)) calc(var(--ui-safe-bottom) + clamp(10px, calc(var(--game-h, 360px) * .028), 14px)) calc(var(--ui-safe-left) + clamp(18px, calc(var(--game-w, 740px) * .036), 30px));
+    overflow: hidden
+}
+#app.mobile-landscape .cover-inner{
+    max-width: none;
+    min-width: 0;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    justify-content: safe center;
+    overflow-y: auto;
+    padding-right: 2px
+}
+#app.mobile-landscape .eyebrow{
+    display: none
+}
+#app.mobile-landscape #cover h1{
+    font-size: clamp(30px, 9.6vh, 38px);
+    line-height: 1.1;
+    letter-spacing: 1px
+}
+#app.mobile-landscape .tagline{
+    font-size: clamp(14px, 4.1vh, 16.5px);
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 6px 0 10px
+}
+#app.mobile-landscape .setup{
+    margin: 0 0 8px;
+    gap: 10px
+}
+#app.mobile-landscape .avatars{
+    gap: 8px
+}
+#app.mobile-landscape .avatar{
+    width: 84px;
+    height: 96px;
+    min-height: 48px
+}
+#app.mobile-landscape .avatar .sprite{
+    width: 52px;
+    height: 52px
+}
+#app.mobile-landscape .avatar span{
+    bottom: 2px;
+    font-size: 14px
+}
+#app.mobile-landscape .start{
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px
+}
+#app.mobile-landscape .cover-row{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 8px
+}
+#app.mobile-landscape .cover-row > #startBtn{
+    width: 100%;
+    min-width: 0
+}
+#app.mobile-landscape .cover-links{
+    min-width: 0;
+    align-items: stretch;
+    justify-content: flex-start
+}
+#app.mobile-landscape .cover-links button{
+    width: auto;
+    min-height: 0;
+    padding: 0 clamp(10px, 2vw, 16px);
+    font-size: 15px;
+    white-space: nowrap
+}
+#app.mobile-landscape .cover-row.has-save{
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+}
+#app.mobile-landscape .cover-row.has-save #startBtn.new-game,
+#app.mobile-landscape .cover-inner #startBtn.new-game{
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    font-size: 16px;
+    padding: 6px 10px;
+    text-align: center
+}
+#app.mobile-landscape .cover-row.has-save .cover-links{
+    min-width: 0
+}
+#app.mobile-landscape .cover-row.has-save .cover-links button{
+    width: 100%;
+    padding: 0 8px
+}
+#app.mobile-landscape .cover-roles{
+    width: min(100%, calc(var(--game-h, 390px) * .92));
+    max-width: none;
+    min-width: 0;
+    justify-self: center;
+    padding: 10px 12px 8px;
+    border-width: 4px;
+    border-radius: 14px;
+    transform: rotate(-1deg);
+    box-shadow: inset 0 0 0 3px #fffdf6, 0 10px 22px #12111f66;
+    overflow: hidden
+}
+#app.mobile-landscape .role-card-head{
+    padding: 0 2px 8px;
+    gap: 2px
+}
+#app.mobile-landscape .role-card-head span{
+    font-size: 12px;
+    letter-spacing: .14em
+}
+#app.mobile-landscape .role-card-head b{
+    display: block;
+    font-size: 15px;
+    line-height: 1.35
+}
+#app.mobile-landscape .role-grid-cover{
+    gap: 6px;
+    margin: 8px 0
+}
+#app.mobile-landscape .role-face{
+    padding: 4px;
+    border-radius: 8px
+}
+#app.mobile-landscape .role-card-foot{
+    padding: 6px 2px 0;
+    font-size: 11px
+}
+#app.mobile-landscape .role-card-foot b{
+    font-size: 13px
+}
+#app.mobile-landscape .role-card-foot small{
+    display: block;
+    font-size: 10px;
+    line-height: 1.3
+}
+@media (max-height: 345px){#app.mobile-landscape .role-card-foot small{
+        display: none
+    }
+#app.mobile-landscape #cover h1{
+        font-size: 28px;
+        line-height: 1.08
+    }
+#app.mobile-landscape .tagline{
+        font-size: 13.5px;
+        margin: 4px 0 8px
+    }
+#app.mobile-landscape .avatar{
+        width: 78px;
+        height: 88px
+    }
+#app.mobile-landscape .avatar .sprite{
+        width: 48px;
+        height: 48px
+    }
+#app.mobile-landscape .start{
+        min-height: 42px
+    }
+}
+#app.mobile-landscape .actions-row .primary{
+    min-height: 48px;
+    font-size: 16px
+}
+@media (max-height: 430px){#app.mobile-landscape .sleep-page .actions-row .primary{
+        min-height: 42px;
+        font-size: 15px
+    }
+}
+#app.mobile-landscape .roles-page .role-grid-modal{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0
+}
+#app.mobile-landscape .roles-page .role-tile{
+    justify-content: flex-start;
+    gap: 1px;
+    padding: 4px 6px 6px;
+    border-radius: 8px
+}
+#app.mobile-landscape .roles-page .role-tile em{
+    font-size: 9px;
+    line-height: 1.2
+}
+#app.mobile-landscape .roles-page .role-tile .role-art,
+#app.mobile-landscape .roles-page .role-lock{
+    flex: 0 0 auto;
+    width: 54px;
+    height: 54px;
+    margin: 1px 0
+}
+#app.mobile-landscape .roles-page .role-lock{
+    font-size: 17px
+}
+#app.mobile-landscape .roles-page .role-tile strong{
+    font-size: 13.5px;
+    line-height: 1.25
+}
+#app.mobile-landscape .roles-page .role-tile small{
+    display: none
+}
+@media (max-height: 345px){#app.mobile-landscape .roles-page .role-tile em{
+        display: none
+    }
+#app.mobile-landscape .roles-page .role-tile .role-art,
+    #app.mobile-landscape .roles-page .role-lock{
+        width: 42px;
+        height: 42px
+    }
+#app.mobile-landscape .roles-page .role-tile strong{
+        font-size: 12.5px
+    }
+}
+@media (max-width: 640px){#app:not(.mobile-landscape) .role-grid-modal{
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+}
+#app.mobile-landscape .role-detail{
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0
+}
+#app.mobile-landscape .role-detail .role-art.large{
+    width: 96px;
+    height: 96px
+}
+#app.mobile-landscape .role-quote{
+    font-size: 15px !important;
+    margin-bottom: 5px !important
+}
+#app.mobile-landscape .role-port{
+    padding: 8px 12px
+}
+#app.mobile-landscape .role-port strong{
+    font-size: 15px
+}
+#app.mobile-landscape .vn-portrait .sprite{
+    width: 96px;
+    height: 96px
+}
+#app.mobile-landscape.is-rotated #rotateHint{
+    display: none !important
+}
+
+/* Browser gestures belong to the stage; reading panes own vertical scrolling. */
+html,body{position:fixed!important;inset:0;width:100%;height:100%;overflow:hidden!important;overscroll-behavior:none}
+body{margin:0;touch-action:none}
+#app{position:fixed;left:0;top:0;overflow:hidden!important;overscroll-behavior:none;touch-action:none!important}
+body,body *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}
+body :is(input,textarea,[contenteditable]:not([contenteditable="false"]),[data-native-select]){-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important;touch-action:manipulation}
+body img,body svg,body canvas{-webkit-user-drag:none;user-drag:none}
+body :is(img,svg)[aria-hidden="true"],body img[alt=""]{pointer-events:none}
+body [data-native-media]{-webkit-touch-callout:default!important;pointer-events:auto}
+#app [data-scroll-y]{overflow-x:hidden!important;overflow-y:auto;overscroll-behavior:none;touch-action:pan-y!important;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch}
+#app [data-scroll-y] *{touch-action:pan-y}
+#app :is([data-gesture-surface],.sw4-board,.sw4-rack,.sw4-order,.cat-v4,.phone-v4-feed,.mg-game-canvas,.gaming-board,#world,#joystick,#report-scene){touch-action:none!important}
+#app button:active:not(:disabled),#app a:active{filter:brightness(.94);box-shadow:inset 0 2px 0 #303c2f22}
+#app button:focus-visible,#app a:focus-visible{outline:2px solid #879976;outline-offset:3px}
+:root{--scroll-thumb:#9eaa83;--scroll-track:#eee5ce}
+body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--scroll-track)!important}
+#app *::-webkit-scrollbar{width:6px!important;height:6px!important}
+#app *::-webkit-scrollbar-track{background:var(--scroll-track)}
+#app *::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:1px solid var(--scroll-track);border-radius:0}
+#app *::-webkit-scrollbar-corner{background:var(--scroll-track)}
+#app :is(.tabs,#navspots){flex-wrap:wrap;overflow-x:hidden}
+@media(prefers-reduced-motion:reduce){#app button:active{transition:none}}
+
+#app .scene-loader{position:absolute;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;background:#e9deb8;color:#3e4938;touch-action:none}
+#app .scene-loader[hidden]{display:none!important}
+#app.is-resource-loading{cursor:progress}
+#app.is-resource-loading>:not(.scene-loader),#app.is-resource-loading>:not(.scene-loader) *{pointer-events:none!important}
+.scene-load-pattern{position:absolute;inset:0;display:grid;grid-template-rows:repeat(7,1fr);opacity:.3;pointer-events:none}
+.scene-load-row{width:calc(100% + 960px);background-size:96px 64px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='64' shape-rendering='crispEdges'%3E%3Cpath d='M12 20h40v4h5v20h-5v4H12v-4H8V24h4z' fill='%237b8b66'/%3E%3Cpath d='M14 26h34v16H14z' fill='%23fff6dc'/%3E%3Cpath d='M18 29h5v10h-5zm9 0h5v10h-5zm9 0h5v10h-5z' fill='%237b8b66'/%3E%3Cpath d='M72 8h4v4h4v4h-4v4h-4v-4h-4v-4h4z' fill='%23bda476'/%3E%3C/svg%3E");animation:scene-load-left 60s linear infinite}
+.scene-load-row:nth-child(even){animation-name:scene-load-right;animation-duration:74s}
+@keyframes scene-load-left{from{transform:translateX(0)}to{transform:translateX(-960px)}}
+@keyframes scene-load-right{from{transform:translateX(-960px)}to{transform:translateX(0)}}
+#app .scene-load-card{position:relative;width:min(460px,calc(100% - 40px));padding:28px 30px 24px;border:3px solid #5d684f;background:#fff6df;box-shadow:5px 5px 0 #bbaa80;text-align:center}
+#app .scene-load-card h2{font-size:24px;line-height:1.4;margin:0 0 22px;color:#44543c}
+.scene-load-battery{position:relative;height:64px;display:flex;gap:5px;margin:0 10px 18px 0;padding:7px;border:4px solid #44543c;background:#f1e7c8}
+.scene-load-battery:after{content:"";position:absolute;width:10px;height:26px;right:-12px;top:15px;background:#44543c}
+.scene-load-cell{flex:1;min-width:0;background:#dcd9bb;position:relative;overflow:hidden}
+.scene-load-cell i{position:absolute;left:0;top:0;bottom:0;width:0;background:#879c6c}
+.scene-load-cell.is-current{outline:2px solid #d7ae5a;outline-offset:-2px}
+#app .scene-load-percent{font-size:21px;font-weight:700;margin:0 0 10px;line-height:1.5;font-variant-numeric:tabular-nums}
+#app .scene-load-status{min-height:40px;margin:0;font-size:14px;line-height:1.5;color:#7b715a;overflow-wrap:anywhere}
+.scene-load-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+#app .scene-load-actions button{min-height:44px;min-width:110px;font-size:15px;border:2px solid #788768;background:#e2e9c8;color:#3b5039;padding:8px 12px;box-shadow:2px 2px 0 #d0c3a1}
+#app .scene-load-actions .scene-load-back{background:#fff7e6;color:#71634f;border-color:#b3a283}
+@media(max-height:440px){#app .scene-load-card{padding:18px 24px;width:min(440px,calc(100% - 36px))}#app .scene-load-card h2{font-size:20px;margin-bottom:14px}.scene-load-battery{height:52px;margin-bottom:10px;padding:5px}.scene-load-battery:after{top:10px;height:24px}#app .scene-load-status{min-height:32px;font-size:13px}#app .scene-load-percent{font-size:18px;margin-bottom:6px}.scene-load-actions{margin-top:10px}}
+@media(prefers-reduced-motion:reduce){.scene-load-row{animation:none!important}}
