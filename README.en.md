@@ -12,6 +12,8 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
+**Current release: [v18 · 2026-11-16](version.json)**
+
 ## What you can do
 
 The game is currently in Simplified Chinese. Choose Qinghe or Nuanxing, explore pixel-art scenes, and see how your actions change the evening's energy meter.
@@ -45,11 +47,33 @@ The energy meter makes the evening’s choices visible: players can revisit how 
 
 The recharge guide connects a game event to a concept, a small action to try, and a research reference with its scope. These are contextual design applications; the energy values are game rules, and the roles are not validated personality categories. Applying work-recovery ideas to social messages is an analogy rather than a directly tested result.
 
+```mermaid
+flowchart TD
+    A[Campus choices] --> B[Actions, time, energy and stamps]
+    B --> C[A character for this evening]
+    C --> D[Review the experience and psychology concept]
+    D --> E[Try a small action or phrase]
+    E --> F[Replay and compare how it feels]
+    F --> A
+    D --> G[Print a recharge receipt]
+```
+
 ## A receipt of the evening
 
 The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure and minimum energy, and stamps from events in the current playthrough. Preview, PNG export, and native image sharing use the same receipt canvas. Its QR code links to the official game.
 
 Sharing adapts to the device: system image sharing, QQ web links, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
+
+![v18 receipt printing and sharing controls](docs/screenshots/receipt-share-v18.jpg)
+
+*Screenshot of the actual v18 receipt component, using the game’s built-in sample records and example stamps. This illustrates the interface rather than a real player assessment.*
+
+<details>
+<summary>View the printed receipt before opening sharing options</summary>
+
+![v18 printed receipt](docs/screenshots/receipt-print-v18.jpg)
+
+</details>
 
 ## Run locally
 
@@ -85,7 +109,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-This repository is based on the November 16, 2026 options and About-page update bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v18 · November 16, 2026**, based on the options and About-page update bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 

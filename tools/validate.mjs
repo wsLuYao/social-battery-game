@@ -10,6 +10,8 @@ const context = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(root, 'src/runtime/manifest.js'), 'utf8'), context);
 const manifest = context.window.GAME_RESOURCE_MANIFEST;
 const resources = manifest.resources;
+const release = JSON.parse(fs.readFileSync(path.join(root, 'version.json'), 'utf8'));
+if (release.version !== 'v18' || release.build !== manifest.version) errors.push('Release version and resource manifest disagree');
 const known = new Set([...Object.keys(manifest.aliases || {}), ...Object.values(resources).map(r => r.url)]);
 const exists = name => fs.existsSync(path.join(root, name));
 for (const [id, resource] of Object.entries(resources)) {
@@ -32,6 +34,8 @@ for (const [alias, id] of Object.entries(manifest.aliases || {})) {
 let canonical;
 for (const name of ['index.html', 'game.html']) {
   const html = fs.readFileSync(path.join(root, name), 'utf8');
+  if (!html.includes(`name="application-version" content="${release.version}"`)) errors.push(`Missing release version: ${name}`);
+  if (!html.includes(`manifest.js?v=${release.build}`)) errors.push(`Wrong manifest cache version: ${name}`);
   for (const match of html.matchAll(/\b(?:src|href|data-game-src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (/^(?:https?:|data:|mailto:)/.test(target) || !target) continue;
@@ -52,6 +56,13 @@ function walk(dir) {
   }
 }
 walk(root);
+const resourcePaths = new Set(Object.values(resources).map(resource => resource.url));
+for (const filename of files) {
+  const relative = path.relative(root, filename).split(path.sep).join('/');
+  if (relative.startsWith('assets/runtime/') && !resourcePaths.has(relative)) errors.push(`Unreferenced release asset: ${relative}`);
+  if (relative.startsWith('src/runtime/') && /^core-|^game-/.test(path.basename(filename)) && !resourcePaths.has(relative)) errors.push(`Obsolete runtime: ${relative}`);
+  if (/(?:^|\/)部署说明_v\d+\.md$|(?:^|\/)_(?:receipt_)?preview/.test(relative)) errors.push(`Obsolete or temporary release file: ${relative}`);
+}
 for (const filename of files.filter(f => /\.(?:js|mjs)$/.test(f))) {
   const result = spawnSync(process.execPath, ['--check', filename], { encoding: 'utf8' });
   if (result.status !== 0) errors.push(`JavaScript syntax: ${path.relative(root, filename)}\n${result.stderr}`);
@@ -78,4 +89,4 @@ if (!exists('.nojekyll')) errors.push('Missing GitHub Pages static marker');
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
-} else console.log(`Passed: ${Object.keys(resources).length} resources, ${Object.keys(manifest.groups).length} groups, entry references, JavaScript syntax, README assets, and receipt QR destination.`);
+} else console.log(`Passed ${release.version}: ${Object.keys(resources).length} resources, ${Object.keys(manifest.groups).length} groups, release versions, no obsolete assets, entry references, JavaScript syntax, README screenshots, and receipt QR destination.`);
