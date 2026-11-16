@@ -1,6 +1,6 @@
-# v18 部署说明
+# v19 部署说明
 
-当前版本：**v18 · 2026-11-16**。版本信息见根目录 [version.json](../version.json)。
+当前版本：**v19 · 2026-11-17**。版本信息见根目录 [version.json](../version.json)。
 
 在线游戏：<https://wsluyao.github.io/social-battery-game/>
 
@@ -19,8 +19,8 @@ node tools/validate.mjs
 ## 文件与版本
 
 - `index.html` 与 `game.html` 是同一游戏的默认入口和兼容入口，共用当前资源清单。
-- `src/runtime/manifest.js` 记录运行文件、资源分组、字节大小和缓存版本 `20261116-v18`。
-- `version.json`、README、两个入口的版本元信息与游戏关于页统一标为 v18。
+- `src/runtime/manifest.js` 记录运行文件、资源分组、字节大小和缓存版本 `20261117-v19`。
+- `version.json`、README、两个入口的版本元信息与游戏关于页统一标为 v19。
 - 当前工作树只保留有效运行资源；旧版部署说明和已替换的运行文件已移除。Git 提交历史保留供追溯。
 
 替换资源后，应同步更新资源清单、修改过的运行文件哈希和入口缓存版本。保持 HTML、`src/`、`assets/` 的相对位置。
@@ -38,3 +38,7 @@ python -m http.server 8000
 ```
 
 访问 [http://localhost:8000](http://localhost:8000)。存档保存在当前浏览器，换域名或端口后不会自动迁移。
+
+## v19 分享图片
+
+出票预览保留横向送纸演出；保存、系统分享和长按保存使用同一张 1200×1200 方形 PNG，保留像素打印机、角色、电量、精选 4 枚印记与二维码。手机文件分享不可用时提示保存图片；菜单分享网页链接不等同于发送小票。

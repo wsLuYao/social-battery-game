@@ -915,6 +915,10 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 #app *::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:1px solid var(--scroll-track);border-radius:0}
 #app *::-webkit-scrollbar-corner{background:var(--scroll-track)}
 #app :is(.tabs,#navspots){flex-wrap:wrap;overflow-x:hidden}
+#app :is(.actions-row,.vn-controls){flex-wrap:wrap;min-width:0}
+#app :is(.actions-row,.vn-controls)>:is(button,a){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#app :is(.choices,.env-options,.call-options,.report-actions){min-width:0}
+#app :is(.choices,.env-options,.call-options,.report-actions)>button{min-width:0;white-space:normal;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){#app button:active{transition:none}}
 
 #app .scene-loader{position:absolute;inset:0;z-index:10000;display:grid;place-items:center;overflow:hidden;background:#e9deb8;color:#3e4938;touch-action:none}

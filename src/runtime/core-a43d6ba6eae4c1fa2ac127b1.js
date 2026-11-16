@@ -1,4 +1,4 @@
-/* Project original content: all rights reserved. No open license granted. See COPYRIGHT.md; third-party terms remain applicable. */
+/* Original project content: all rights reserved. No open license granted. See COPYRIGHT.md and THIRD_PARTY_NOTICES.md. */
 
 /* assets-data.js */
 window.GAME_ASSETS={"atlas_01": "assets/runtime/5b1b364e96ae931110719afa.webp", "atlas_02": "assets/runtime/7ca45780bfa1bfe5829e0df4.webp", "atlas_03": "assets/runtime/2e96051ec1fdddcc90b013dd.webp", "atlas_04": "assets/runtime/eec4d926c209f9661de1666c.webp", "atlas_05": "assets/runtime/158d5ecf5de6cf271c9330f2.webp", "atlas_06": "assets/runtime/86a9545cbc3e6512a38d53b3.webp", "atlas_c1": "assets/runtime/c01b0e9e72acd99a789993ec.webp", "atlas_c2": "assets/runtime/ded4140f1d1b4c9388f7c2d1.webp", "bg_dorm": "assets/runtime/c398974c1c09d965122a96e3.webp", "bg_party": "assets/runtime/ba505d6d2d15603bef49784d.webp", "report_backdrop-dark": "assets/runtime/cb81bed8055f72ff2d7c1a7a.png", "report_backdrop": "assets/runtime/8232232eba88156f64572e01.png", "main_cast": "assets/runtime/42f3ecb33dc7d4d66eaab336.png", "student_pair": "assets/runtime/0f2b725cd921042467dcf099.png", "legs_01_bag": "assets/runtime/88cbd3bc2659f5cab9447b9b.png", "legs_02_yellow_coat": "assets/runtime/10f9175e3118aa31f039d3d9.png", "legs_03_ponytail": "assets/runtime/3f2689023843dc8237e657bc.png", "legs_04_book": "assets/runtime/5730d6eb3c730bc8b965faa2.png", "legs_05_boardgame": "assets/runtime/62136823d75cd6744491109e.png", "side_01_bag": "assets/runtime/598d164b7279f85880166319.png", "side_02_yellow_coat": "assets/runtime/3dd0ef0ab00987551d822cdc.png", "side_03_ponytail": "assets/runtime/3ddce0609963353e86bf601a.png", "side_04_book": "assets/runtime/a886b90bb0055247f28a6f28.png", "side_05_boardgame": "assets/runtime/e2e48829637ad8d0fa1eeb5e.png", "campus_jogger_cast": "assets/runtime/1b7610d41193adcf236c9aec.png", "campus_jogger_legs": "assets/runtime/f4b6663bee3a821a8f182352.png", "campus_jogger_side": "assets/runtime/10ea1e12cc5d9b5d95a70760.png", "campus_jogger_side_four": "assets/runtime/fcca1de792abd544d75353fc.png", "campus_jogger_torso": "assets/runtime/0960a69c3d75027d64fe3ccb.png", "campus_reader_cast": "assets/runtime/fa901f3f07c8479744294e37.png", "campus_reader_legs": "assets/runtime/ce861fba91109a330ee584c2.png", "campus_reader_side": "assets/runtime/452ba8c567344837470af094.png", "campus_reader_side_four": "assets/runtime/880d301188fb9b9715d7bdcd.png", "campus_reader_torso": "assets/runtime/12fbe4efb8818d5f98d51469.png", "chef_pull_atlas": "assets/runtime/72de780cde3f604b0427225d.png", "diner_01_eating": "assets/runtime/6f321dd4e073216b68f91d46.png", "diner_01_eating_lower": "assets/runtime/db0d0b0f5ca3cb3d54d7e1ff.png", "diner_01_eating_upper": "assets/runtime/18cc13c4b54da083f13f4038.png", "diner_02_eating": "assets/runtime/327c544a30ee920a45c08983.png", "diner_02_eating_lower": "assets/runtime/78dcbbbec126ee4a33df870d.png", "diner_02_eating_upper": "assets/runtime/82bb67bef6db868e2990e426.png", "diner_03_eating": "assets/runtime/92d92cd2ae131290de5ab272.png", "diner_03_eating_lower": "assets/runtime/dcef28678aa136ecbc2ae5ce.png", "diner_03_eating_upper": "assets/runtime/f11a2afb5f787ec4a002ad55.png", "diner_04_eating": "assets/runtime/50fd2953119fb7d29598a544.png", "diner_04_eating_lower": "assets/runtime/91e307ae4e119e9ce3c1fe32.png", "diner_04_eating_upper": "assets/runtime/fe6b975ee4a7b8ef6185ddc2.png", "diner_05_eating": "assets/runtime/aed8701a0a00382a46972c53.png", "diner_05_eating_lower": "assets/runtime/1027784b19dd08cc836fff44.png", "diner_05_eating_upper": "assets/runtime/27c87b832737b3aded55c480.png", "diner_06_eating": "assets/runtime/5334bf52c730cd43ee6962a2.png", "diner_06_eating_lower": "assets/runtime/3cea820469c869039c33baeb.png", "diner_06_eating_upper": "assets/runtime/333d50639e08347c90da8601.png", "diner_07_eating": "assets/runtime/0da4dc80dd813a27df8bc2c4.png", "diner_07_eating_lower": "assets/runtime/91887282c90e80f476528f81.png", "diner_07_eating_upper": "assets/runtime/214b909441c282cfb7485d84.png", "diner_08_eating": "assets/runtime/1230d0525bfb8b46947065f0.png", "diner_08_eating_lower": "assets/runtime/56b50d1286dfff5c289cd9a0.png", "diner_08_eating_upper": "assets/runtime/4adddb9d4fb49c290189af31.png", "late_snack_atlas": "assets/runtime/88f184bc98d53c05142f5b6e.png", "late_snack_bg": "assets/runtime/5f2ce067787032d34e1c9ca2.png", "night_walk_atlas": "assets/runtime/07d10968ad0bbed5d1b5df42.png", "night_walk_bg": "assets/runtime/75f300b6814f6f583e46ad63.png", "noodle_chef_cast": "assets/runtime/d94dd1b60fd454bfbe054435.png", "noodle_chef_legs": "assets/runtime/f39609a503120092a0c8c173.png", "noodle_chef_side": "assets/runtime/ddc727cbbc5427e42ca23115.png", "noodle_chef_side_four": "assets/runtime/4b53ce2f36ec6e119371784c.png", "noodle_chef_torso": "assets/runtime/056f6623124bfe4d1a996b57.png", "snack_ayao_eat": "assets/runtime/02bae126848de54b38af266c.png", "snack_ayao_eat_lower": "assets/runtime/46bd5c2da262c214ad8f9498.png", "snack_ayao_eat_upper": "assets/runtime/14249a31a5ffe7b5d95310ec.png", "snack_ayao_idle": "assets/runtime/5a0c6d3d11a8cff6628eddf2.png", "snack_ayao_idle_lower": "assets/runtime/0e8596e4adab7585d39ff6da.png", "snack_ayao_idle_upper": "assets/runtime/e39698abf78a2dcf642c1c54.png", "snack_diner_cast": "assets/runtime/bbeaff824d331ef914e9ed13.png", "snack_diner_legs": "assets/runtime/27db365910a3f16a748ff9ed.png", "snack_diner_side": "assets/runtime/5daec2577c430f790948c2a5.png", "snack_diner_side_four": "assets/runtime/a1c33f81d991e63da2558ab3.png", "snack_diner_torso": "assets/runtime/113f921a1616b861c60be0a0.png", "snack_nuanxing_eat": "assets/runtime/f482246be7557befc798cc7c.png", "snack_nuanxing_eat_lower": "assets/runtime/3b869944f90788da5d65221d.png", "snack_nuanxing_eat_upper": "assets/runtime/a9fe57f99ac977110166e873.png", "snack_nuanxing_idle": "assets/runtime/501fd212cfa6526fc17a277e.png", "snack_nuanxing_idle_lower": "assets/runtime/42b28cb0aa22c83745160408.png", "snack_nuanxing_idle_upper": "assets/runtime/4ef99c4a4866cd198a12f8cd.png", "snack_qinghe_eat": "assets/runtime/f088c531491fbc28991dd26b.png", "snack_qinghe_eat_lower": "assets/runtime/ffd5b3cee5236144899609be.png", "snack_qinghe_eat_upper": "assets/runtime/11881507bc8f9a1655c14efd.png", "snack_qinghe_idle": "assets/runtime/c2b7ae2045713fe2eac759bb.png", "snack_qinghe_idle_lower": "assets/runtime/3a2304698dad548da87c3642.png", "snack_qinghe_idle_upper": "assets/runtime/545ec7a6f4331100109042c4.png", "snack_waiter_carry_front": "assets/runtime/27f6d519d66838137d51f6d1.png", "snack_waiter_carry_right": "assets/runtime/f6b032233b85f99e1d12255b.png", "snack_waiter_return_right": "assets/runtime/f81427086660a83ed8529aae.png", "snack_waiter_serve_right": "assets/runtime/82b81f5e903b4e6942faa1c5.png", "icon-about": "assets/runtime/3a6533226f4b4bf7c4740fe0.svg", "icon-battery-empty": "assets/runtime/0a1da0d602c7491609148e3d.svg", "icon-battery-full": "assets/runtime/81ba0f4b73dfb99f7ef17955.svg", "icon-battery-low": "assets/runtime/7a5de1c0b018c2d2a790fd51.svg", "icon-battery-medium": "assets/runtime/05a5bfa6d11a31911232a79b.svg", "icon-chat": "assets/runtime/0a15509d4981d94de95ce176.svg", "icon-chevron-down": "assets/runtime/24753072edd4e673007c826d.svg", "icon-clock": "assets/runtime/f78f400d5d4b8a1f3e224e0a.svg", "icon-close": "assets/runtime/def42b7d0d0f360a129228dd.svg", "icon-fullscreen": "assets/runtime/e67d76baf25d496338e027c7.svg", "icon-game": "assets/runtime/5d1cbca0f188fee7fd0c19a2.svg", "icon-goal": "assets/runtime/83f966ef18ba2d2072da03a9.svg", "icon-help": "assets/runtime/9c69ffbf533129c8c07c57b7.svg", "icon-home": "assets/runtime/9906cda34f1adfc8ee9456f8.svg", "icon-more": "assets/runtime/513fe211217951f853cec7ec.svg", "icon-move": "assets/runtime/6f63002f436d4cb86bcb233e.svg", "icon-sound-off": "assets/runtime/9da862e32d54c59081430f6a.svg", "icon-sound-on": "assets/runtime/9ccfc79a3b4aab04a48284da.svg", "icon-undo": "assets/runtime/6e5dc85b5b5e6978c986837a.svg"};
@@ -580,12 +580,15 @@ window.GameResources.bindAssets(window.DORM_PORTRAIT_ASSETS);
 window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
 
 /* receipt-renderer.js */
-/* The same horizontal receipt is used for preview, save and native sharing. */
+/* Horizontal paper feeds through the printer; a square keepsake is saved/shared. */
 (function(root){
  'use strict';
  const W=1600,H=740,ink='#303c2f';
  function theme(role){const color=/^#[a-f\d]{6}$/i.test(role?.color)?role.color:'#A8BF79',light=/^#[a-f\d]{6}$/i.test(role?.light)?role.light:'#EAF0D2';const rgb=color.slice(1).match(/../g).map(v=>parseInt(v,16)),base=[30,51,39];return{color,light,ink:'#'+rgb.map((n,i)=>Math.round(n*.48+base[i]*.52).toString(16).padStart(2,'0')).join('')};}
  const themeStyle=role=>{const t=theme(role);return `--receipt-accent:${t.color};--receipt-light:${t.light};--receipt-dark:${t.ink};`;};
+ // Source-space slots differ slightly between the six hand-painted printer PNGs.
+ // Normalize the real opening, keeping the entire silhouette inside the square.
+ const squarePrinterSlots={cat:[616,748,354,1717],warm:[605,681,368,1699],walk:[649,746,346,1715],island:[648,745,348,1720],jelly:[605,681,368,1700],offline:[654,750,347,1720]};
  async function render(options){
   const {data,role,entries,loadImage,loadAsset,drawAssetFit,drawStampBase,drawTextBadge,fitFont,drawWrappedLines,qr}=options;
   const colors=theme(role),green=colors.ink;
@@ -639,7 +642,81 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   font(29,'700');ctx.textAlign='center';ctx.fillText('扫码来测测',1430,532);ctx.fillText('我的社交节奏',1430,575);ctx.textAlign='left';
   return canvas;
  }
- root.ReceiptRenderer={render,width:W,height:H,theme,themeStyle};
+ async function renderSquare(options){
+  const {data,role,entries,loadImage,loadAsset,drawAssetFit,drawStampBase,drawTextBadge,fitFont,drawWrappedLines,qr}=options;
+  const colors=theme(role),assets=root.ReportAssets||{},art=root.ReceiptAssets||{};
+  const selected=entries.slice(0,4);
+  const [printer,sprite,logo,stamps]=await Promise.all([
+   loadImage(art['printer_'+data.roleId]||art.printer),loadImage(assets.sprites?.[data.roleId]||assets.svgs?.[data.roleId]||data.sprite),loadImage(assets.icons?.battery),
+   Promise.all(selected.map(async entry=>{let image=null,assetId='';for(const id of [entry.info.assetId,entry.info.fallbackAsset,'stamp_task']){image=await loadAsset(id);if(image){assetId=id;break;}}return{...entry,image,assetId,badgeImage:await loadAsset(entry.info.badgeAsset)};}))
+  ]);
+  if(!printer||!sprite)throw Error('小票素材未准备好');
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=1200;
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const font=(size,weight='400')=>ctx.font=`${weight} ${size}px "SocialBatteryUI","Microsoft YaHei","PingFang SC",sans-serif`;
+  const text=(value,x,y,size,color=ink,weight='400')=>{font(size,weight);ctx.fillStyle=color;ctx.fillText(value,x,y);};
+  const dash=y=>{ctx.save();ctx.strokeStyle='#c9bfa3';ctx.lineWidth=2;ctx.setLineDash([5,8]);ctx.beginPath();ctx.moveTo(205,y);ctx.lineTo(975,y);ctx.stroke();ctx.restore();};
+  ctx.fillStyle='#fff6dc';ctx.fillRect(0,0,1200,1200);
+  ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=colors.ink;
+  for(let y=25;y<1200;y+=50)for(let x=25;x<1200;x+=50){ctx.fillRect(x,y+3,10,3);ctx.fillRect(x+3,y,3,10);}ctx.restore();
+  // The real pixel printer is turned so its existing right-hand slot faces down.
+  // Paper begins inside the black opening, not behind the machine's outer shell.
+  const pw=printer.naturalWidth||printer.width,ph=printer.naturalHeight||printer.height;
+  const slot=squarePrinterSlots[data.roleId]||squarePrinterSlots.cat,ps=.56;
+  const tx=600+ps*(slot[2]+slot[3])/2,ty=430-ps*(slot[0]+slot[1])/2;
+  ctx.save();ctx.translate(tx,ty);ctx.rotate(Math.PI/2);ctx.drawImage(printer,0,0,pw*ps,ph*ps);ctx.restore();
+  ctx.textAlign='center';[...'小票已印好'].forEach((ch,i)=>text(ch,tx-ps*650,ty+ps*(235+i*43),20,colors.ink,'700'));ctx.textAlign='left';
+  // Layout in paper coordinates, proportionally fitted under the actual opening.
+  const paperScale=720/830;
+  ctx.save();ctx.translate(240-170*paperScale,430-366*paperScale);ctx.scale(paperScale,paperScale);
+  const paper={x:170,y:366,w:830,h:786};
+  ctx.fillStyle='#423f3520';ctx.fillRect(paper.x+8,paper.y+8,paper.w,paper.h);
+  ctx.fillStyle='#fffbee';ctx.fillRect(paper.x,paper.y,paper.w,paper.h);
+  for(let x=paper.x;x<paper.x+paper.w;x+=24)ctx.fillRect(x+12,paper.y+paper.h,12,8);
+  // A narrow dark top edge gives a visible paper/roller contact inside the slot.
+  ctx.fillStyle='#252c25';ctx.fillRect(paper.x-2,paper.y-6,paper.w+4,6);
+  ctx.fillStyle='#ddd4bb';ctx.fillRect(paper.x,paper.y,paper.w,5);
+  if(logo)ctx.drawImage(logo,205,397,38,22);
+  text('今晚的充电小票',259,420,27,colors.ink,'800');
+  ctx.textAlign='right';text('NO. '+String(data.serial||'01').split('/')[0].trim().padStart(4,'0'),975,419,20,'#81785e');ctx.textAlign='left';dash(443);
+  ctx.fillStyle='#d6ccb2';ctx.fillRect(211,480,214,214);ctx.fillStyle=colors.light;ctx.fillRect(205,474,214,214);
+  ctx.strokeStyle=colors.ink;ctx.lineWidth=3;ctx.strokeRect(205,474,214,214);
+  const sw=sprite.naturalWidth||sprite.width,sh=sprite.naturalHeight||sprite.height,k=Math.min(180/sw,180/sh);
+  ctx.drawImage(sprite,222+(180-sw*k)/2,491+(180-sh*k)/2,sw*k,sh*k);
+  ctx.fillStyle='#f2c45c';for(const [x,y]of [[410,468],[199,681]]){ctx.fillRect(x-7,y,22,6);ctx.fillRect(x,y-7,6,22);}
+  text('我的社交节奏',452,497,24,colors.ink,'700');
+  fitFont(ctx,role.name,523,43,32,'900');ctx.fillStyle=ink;ctx.fillText(role.name,450,553);
+  ctx.fillStyle=colors.light;ctx.fillRect(452,568,523,7);
+  font(28,'700');ctx.fillStyle=ink;const leadLines=drawWrappedLines(ctx,role.profileLead||role.description||'',452,618,523,37,2);
+  font(23);ctx.fillStyle='#5a6254';drawWrappedLines(ctx,role.profileBody||'',452,618+leadLines*37+7,523,31,2);
+  const energy=Number.isFinite(data.departure)?Math.max(0,Math.min(100,data.departure)):null;
+  ctx.fillStyle=colors.light;ctx.fillRect(450,752,525,53);
+  text('离场电量',467,788,22,colors.ink,'700');
+  ctx.strokeStyle=colors.ink;ctx.lineWidth=2;ctx.strokeRect(575,769,128,22);ctx.fillStyle=colors.ink;ctx.fillRect(703,775,5,10);
+  for(let i=0;i<10;i++){ctx.fillStyle=energy!==null&&i<Math.round(energy/10)?colors.ink:'#d8d9bf';ctx.fillRect(580+i*12,773,8,14);}
+  ctx.textAlign='right';text(energy===null?'—':String(energy),914,790,35,ink,'800');text('/100',958,788,19,'#68715c');ctx.textAlign='left';
+  const quote='“'+(role.quote||'')+'”';fitFont(ctx,quote,222,23,20,'700');ctx.fillStyle=colors.ink;drawWrappedLines(ctx,quote,312,724,222,29,3,'center');ctx.textAlign='left';
+  let tagX=452;for(const tag of (role.tags||[]).slice(0,3)){font(21,'700');const width=ctx.measureText(tag).width+18;ctx.fillStyle=colors.light;ctx.fillRect(tagX,824,width,34);text(tag,tagX+9,848,21,colors.ink,'700');tagX+=width+9;}
+  dash(882);text('今晚收藏印记',205,922,24,colors.ink,'700');
+  const total=new Set((data.impressions||[]).map(item=>item.impressionId)).size,earned=stamps.filter(entry=>entry.earned).length;
+  ctx.textAlign='right';text(total>earned?`点亮 ${total} 枚 · 精选 ${earned} 枚`:`点亮 ${total} 枚`,780,919,18,'#81785e');ctx.textAlign='left';
+  stamps.forEach((entry,i)=>{
+   const x=205+i*145,y=943;drawStampBase(ctx,x,y,132,117,entry.earned);
+   const draw=(target,ox,oy)=>{drawAssetFit(target,entry.image,entry.assetId,ox+31,oy+10,70);if(entry.badgeImage)drawAssetFit(target,entry.badgeImage,entry.info.badgeAsset,ox+101,oy+9,23);else if(entry.info.badge)drawTextBadge(target,ox+113,oy+21,entry.info.badge);};
+   if(entry.earned)draw(ctx,x,y);else{const muted=document.createElement('canvas');muted.width=132;muted.height=85;const m=muted.getContext('2d');draw(m,0,0);const pixels=m.getImageData(0,0,132,85);for(let p=0;p<pixels.data.length;p+=4){const g=Math.round(.2126*pixels.data[p]+.7152*pixels.data[p+1]+.0722*pixels.data[p+2]);pixels.data[p]=pixels.data[p+1]=pixels.data[p+2]=g;pixels.data[p+3]=Math.round(pixels.data[p+3]*.36);}m.putImageData(pixels,0,0);ctx.drawImage(muted,x,y);}
+   font(19,entry.earned?'700':'400');ctx.fillStyle=entry.earned?ink:'#989b8a';drawWrappedLines(ctx,entry.info.label||'今晚收藏',x+66,y+101,116,21,1,'center');ctx.textAlign='left';
+  });
+  // The invitation stays on the receipt, with a separate clear QR quiet zone.
+  ctx.fillStyle=colors.light;ctx.fillRect(205,1080,567,48);text('扫码来测测我的社交节奏',220,1113,26,colors.ink,'700');
+  ctx.fillStyle=colors.ink;ctx.fillRect(727,1101,28,4);ctx.fillRect(747,1094,4,18);ctx.fillRect(751,1098,4,10);
+  ctx.restore();
+  // QR stays on integer device pixels, independent of the paper's layout scale.
+  const qx=792,qy=930,unit=4;ctx.fillStyle='#fffdf5';ctx.fillRect(qx,qy,qr.rows.length*unit,qr.rows.length*unit);ctx.fillStyle=ink;
+  qr.rows.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')ctx.fillRect(qx+i*unit,qy+j*unit,unit,unit);});
+  return canvas;
+ }
+
+ root.ReceiptRenderer={render,renderSquare,width:W,height:H,shareSize:1200,theme,themeStyle};
 })(window);
 
 
@@ -754,6 +831,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   let state = null;
   let side = 'front';
   let shareCanvas = null;
+  let receiptCanvas = null;
   let shareSelection = null;
   let sharePickerDraft = null;
   let shareExporting = false;
@@ -950,6 +1028,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     state.mount.dataset.rpFit = mode === 'landscape' || mode === 'small' ? 'viewport' : 'normal';
     fitReceiptPreview();
     positionReceiptGuide();
+    syncImageShareGuide();
   }
 
   // This clock starts when the report is actually revealed, after the summon animation.
@@ -1123,16 +1202,30 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     return target instanceof Element && !!target.closest('button,a,input,textarea,select,summary,[contenteditable="true"],[contenteditable=""]');
   }
 
+  // 与游戏舞台共用方向：竖屏手机顺时针旋转后，视觉横向对应 clientY。
+  function gesturePoint(x, y) {
+    const app = document.getElementById('app');
+    if (!app) return { x, y };
+    const box = app.getBoundingClientRect(), rotated = app.classList.contains('is-rotated');
+    const width = app.clientWidth || (rotated ? box.height : box.width) || 1;
+    const height = app.clientHeight || (rotated ? box.width : box.height) || 1;
+    return rotated
+      ? { x: (y - box.top) * width / Math.max(1, box.height), y: (box.right - x) * height / Math.max(1, box.width) }
+      : { x: (x - box.left) * width / Math.max(1, box.width), y: (y - box.top) * height / Math.max(1, box.height) };
+  }
+
   function startGesture(x, y) {
     cancelHint();
     const scene = sceneEl();
     if (!scene) return;
-    gesture = Swipe.begin(x, y, performance.now(), scene.getBoundingClientRect().width, side);
+    const point = gesturePoint(x, y);
+    gesture = Swipe.begin(point.x, point.y, performance.now(), scene.clientWidth || scene.getBoundingClientRect().width, side);
   }
 
   function moveGesture(x, y) {
     if (!gesture) return false;
-    const axis = Swipe.move(gesture, x, y);
+    const point = gesturePoint(x, y);
+    const axis = Swipe.move(gesture, point.x, point.y);
     if (axis !== 'x') return false;
     const scene = sceneEl();
     const rotor = rotorEl();
@@ -1149,7 +1242,8 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     if (!gesture) return;
     const snapshot = gesture;
     gesture = null;
-    const next = Swipe.end(snapshot, x, y, performance.now(), cancelled);
+    const point = gesturePoint(x, y);
+    const next = Swipe.end(snapshot, point.x, point.y, performance.now(), cancelled);
     if (snapshot.axis === 'x') ignoreClickUntil = performance.now() + 350;
     if (next) setFace(next);
     else snapBack();
@@ -1391,6 +1485,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
             <button type="button" class="report-button report-text r16-share-toggle" data-receipt-options aria-expanded="false" aria-controls="receipt-share-options" disabled>分享</button>
           </footer>
           <aside class="r16-channel-tray" id="receipt-share-options" aria-label="分享方式" hidden>
+              <p class="square-share-label">分享的是 1:1 方形小票</p>
               <div class="ds5-share-channels" role="group" aria-label="分享充电说明书">
                 <button type="button" class="ds5-share-channel" data-share-channel="moments" aria-label="分享到朋友圈"><span class="ds5-share-round"><img src="${esc(shareChannelAsset('share_moments_v6'))}" alt="" draggable="false"></span><span>朋友圈</span></button>
                 <button type="button" class="ds5-share-channel" data-share-channel="wechat" aria-label="分享给微信好友"><span class="ds5-share-round"><img src="${esc(shareChannelAsset('share_wechat_v6'))}" alt="" draggable="false"></span><span>微信好友</span></button>
@@ -1407,6 +1502,13 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
               </div>
 
           </aside>
+          <div class="image-share-guide" data-image-share-guide hidden>
+            <div class="image-share-menu-cue" aria-hidden="true"><span>···</span><svg viewBox="0 0 160 120"><path d="M144 108H96V76H56V20H20M20 20H48M20 20V48"/></svg></div>
+            <section class="image-share-guide-content" role="dialog" aria-modal="true" aria-labelledby="image-share-guide-title">
+              <img data-image-share-preview data-native-media alt="长按保存方形充电小票" draggable="false">
+              <div class="image-share-guide-copy"><h2 id="image-share-guide-title">把这一晚带给朋友</h2><p data-image-share-menu-copy></p><p class="image-share-note">小票请长按图片保存，再从相册发送；浏览器菜单分享的是游戏链接。</p><div class="image-share-guide-actions"><button type="button" data-image-share-save>保存方形小票</button><button type="button" data-image-share-dismiss>选择分享方式</button></div></div>
+            </section>
+          </div>
           <p class="r16-sr" data-receipt-announcement aria-live="polite"></p>
         </section>
       </div>
@@ -1443,6 +1545,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   }
 
   function hideModals() {
+    hideImageShareGuide();
     const shareWasOpen = !$('#report-share-modal')?.hidden;
     if (shareWasOpen) { stopReceiptPrint(); shareGeneration++; shareRequest++; shareBusy=false; shareExporting=false; }
     $$('.report-modal').forEach(modal => { modal.hidden = true; });
@@ -1733,11 +1836,12 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
       return cache.get(id);
     };
     try { await document.fonts?.ready; } catch {}
-    return root.ReceiptRenderer.render({ data, role: data.role || roleOf(data.roleId), entries: shareStampEntries(data), loadImage, loadAsset, drawAssetFit, drawStampBase, drawTextBadge, fitFont, drawWrappedLines, qr: SHARE_GAME_QR });
+    const renderer = options.format === 'square' ? root.ReceiptRenderer.renderSquare : root.ReceiptRenderer.render;
+    return renderer({ data, role: data.role || roleOf(data.roleId), entries: shareStampEntries(data), loadImage, loadAsset, drawAssetFit, drawStampBase, drawTextBadge, fitFont, drawWrappedLines, qr: SHARE_GAME_QR });
   }
 
   async function makeShareCanvas() {
-    return renderShareCard();
+    return renderShareCard({format:'square'});
   }
 
   function stopReceiptPrint() {
@@ -1752,10 +1856,27 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     const open = typeof force === 'boolean' ? force : tray.hidden;
     tray.hidden = !open; button.setAttribute('aria-expanded', String(open));
   }
+  function hideImageShareGuide() {
+    const guide=$('[data-image-share-guide]');
+    if(guide)guide.hidden=true;
+  }
+  function showImageShareGuide() {
+    const guide=$('[data-image-share-guide]');
+    if(!guide||!shareCanvas)return;
+    const image=$('[data-image-share-preview]');if(image)image.src=shareCanvas.toDataURL('image/png');
+    guide.hidden=false;syncImageShareGuide();
+    $('[data-image-share-dismiss]')?.focus({preventScroll:true});
+  }
+  function syncImageShareGuide() {
+    const guide=$('[data-image-share-guide]');if(!guide||guide.hidden)return;
+    const rotated=!!document.getElementById('app')?.classList.contains('is-rotated');
+    const copy=$('[data-image-share-menu-copy]');if(copy)copy.textContent=`在微信、QQ打开的请点击${rotated?'左上角':'右上角'}分享`;
+    guide.classList.toggle('menu-at-left',rotated);
+  }
   function startReceiptPrint() {
     const modal = $('#report-share-modal'), scene = $('[data-receipt-scene]'), preview = $('.report-share-image');
     if (!shareCanvas || !scene || !preview || modal?.hidden) return false;
-    stopReceiptPrint(); toggleReceiptOptions(false);
+    stopReceiptPrint(); toggleReceiptOptions(false); hideImageShareGuide();
     modal.classList.remove('is-expanded');
     fitReceiptPreview();
     const owner = receiptPrint = { frame:0, elapsed:0, last:0, sound:0, state };
@@ -1808,7 +1929,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     if (!wrap || !state) return;
     const save = $('#report-save-png');
     const generation = ++shareGeneration, currentState = state;
-    stopReceiptPrint(); shareCanvas = null; shareFile = null;
+    stopReceiptPrint(); shareCanvas = null; receiptCanvas = null; shareFile = null; hideImageShareGuide();
     shareExporting = false; toggleReceiptOptions(false);
     wrap.replaceChildren();
     const message = $('[data-receipt-message]'); if (message) { message.hidden=false; message.textContent='正在整理这一晚的小票…'; }
@@ -1818,9 +1939,9 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     for(const control of $$('[data-receipt-print],[data-receipt-options]'))control.disabled=true;
     if (save) { save.disabled = true; save.textContent = '正在装纸…'; }
     try {
-      const canvas = await makeShareCanvas();
+      const [canvas,square] = await Promise.all([renderShareCard(),makeShareCanvas()]);
       if (generation !== shareGeneration || state !== currentState) return;
-      shareCanvas = canvas;
+      receiptCanvas = canvas; shareCanvas = square;
       const preview = new Image();
       preview.className = 'report-share-image';
       preview.setAttribute('data-native-media','');
@@ -1828,14 +1949,14 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
       preview.setAttribute('role','button');
       preview.setAttribute('aria-label','点按放大或收起小票');
       preview.alt = `${state.role.name}的充电小票，离场电量${valueText(state.departure)}/100。`;
-      preview.src = shareCanvas.toDataURL('image/png');
+      preview.src = receiptCanvas.toDataURL('image/png');
       if (preview.decode) await preview.decode();
       if (generation !== shareGeneration || state !== currentState || $('#report-share-modal')?.hidden) return;
       preview.addEventListener('click',toggleReceiptZoom);
       preview.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReceiptZoom();}});
       wrap.replaceChildren(preview);
       if (typeof root.File === 'function') {
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const blob = await new Promise(resolve => square.toBlob(resolve, 'image/png'));
         if (generation !== shareGeneration || state !== currentState) return;
         if (blob) shareFile = new root.File([blob], '今晚的充电小票.png', { type: 'image/png' });
       }
@@ -1941,9 +2062,9 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     showShareHelp(message, info.caption);
     const title=$('[data-share-help-title]'); if(title)title.textContent='分享到' + target;
     const picture=$('[data-share-help-image]'), preview=$('#report-canvas-wrap .report-share-image');
-    if(picture){picture.src=preview?.src || '';picture.hidden=!preview?.src;}
+    if(picture){picture.src=shareCanvas?.toDataURL('image/png') || preview?.src || '';picture.hidden=!picture.src;}
     const web=$('[data-share-help-web]');
-    if(web){web.hidden=!['qq','qzone'].includes(channel);web.href=qqShareURL(channel,info);web.textContent='打开' + target + '分享页 ↗';}
+    if(web){web.hidden=!['qq','qzone'].includes(channel);web.href=qqShareURL(channel,info);web.textContent='仅分享' + target + '游戏链接 ↗';}
     const imageButton=$('[data-share-help-system]'),linkButton=$('[data-share-help-link]');
     if(imageButton){imageButton.hidden=!nativeSharePayload(info,false)?.files;imageButton.onclick=()=>shareViaChannel(channel,{nativeOnly:true});}
     if(linkButton){linkButton.hidden=typeof root.navigator?.share!=='function';linkButton.onclick=()=>shareViaChannel(channel,{nativeOnly:true,textOnly:true});}
@@ -1970,7 +2091,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     try {
       if (channel === 'copy') { await copyShareText(info.url || info.caption, info.url ? '已复制游戏链接。' : '离线体验没有公开链接，已复制本局分享文案。'); return; }
       const ua=root.navigator?.userAgent||'',wechat=/MicroMessenger/i.test(ua),qq=/\bQQ\//i.test(ua)&&!wechat;
-      if(qq && !options.nativeOnly && typeof root.mqq?.ui?.shareMessage==='function') {
+      if(qq && options.textOnly && !options.nativeOnly && typeof root.mqq?.ui?.shareMessage==='function') {
         shareHelp(channel,`在QQ面板中选择接收人；要分享完整小票，可保存下面的图片。`,info);
         // No await before calling a platform API: keep the original click activation.
         shareStatus(`已请求打开${target}面板。`);
@@ -1986,25 +2107,18 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
         });
         return;
       }
-      if(wechat && !options.nativeOnly){
-        const message=['wechat','moments'].includes(channel)?`点微信右上角「···」，选择「${channel==='moments'?'分享到朋友圈':'发送给朋友'}」分享游戏；分享本局小票请长按下图保存，再从相册发送。`:`请长按下图保存小票，再到${target}从相册分享；也可复制游戏链接。`;
-        shareHelp(channel,message,info);shareStatus(message);return;
-      }
       const payload=nativeSharePayload(info,!!options.textOnly);
       const mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(ua);
-      // Mobile QQ/Qzone should open the system picture share sheet, not a desktop login webpage.
-      if(payload && (mobile || !['qq','qzone'].includes(channel) || options.nativeOnly)){
+      // All picture channels share the exact square PNG; a link-only payload is explicit.
+      if(payload && (payload.files || options.textOnly) && (mobile || wechat || qq || options.nativeOnly || payload.files)){
+        hideImageShareGuide();
         shareStatus(`请在系统分享面板选择${target}。`);
         await root.navigator.share(payload);
         if(current())shareStatus('已交给系统分享面板；是否发送以应用中的操作为准。');return;
       }
-      if(['qq','qzone'].includes(channel) && !options.nativeOnly){
-        shareHelp(channel,`在新窗口完成${target}分享。若窗口没有打开，点下方「打开分享页」；个人小票可先保存，再在分享页添加图片。`,info);
-        root.open(qqShareURL(channel,info),'_blank','noopener,noreferrer');
-        shareStatus(`请在${target}分享页继续。`);return;
-      }
-      shareHelp(channel,`保存下面的小票，再打开${target}从相册发送；链接也可单独复制。`,info);
-      shareStatus(`已准备好${target}的小票和链接。`);
+      shareHelp(channel,`长按或保存下面的方形小票，再打开${target}从相册发送。`,info);
+      if(mobile||wechat||qq||document.getElementById('app')?.classList.contains('mobile-landscape'))showImageShareGuide();
+      shareStatus(`已准备好${target}的方形小票，可长按或保存图片。`);
     } catch (error) {
       if (!current()) return;
       if (error?.name === 'AbortError') shareStatus('已取消分享。');
@@ -2074,6 +2188,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     }
     state = null;
     shareCanvas = null;
+    receiptCanvas = null;
     shareFile = null; shareBusy = false; shareRequest++; shareGeneration++;
     shareSelection = null;
     sharePickerDraft = null;
@@ -2106,7 +2221,13 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     const save = $('#report-save-png');
     if (save) on(save, 'click', saveShare);
     const print=$('[data-receipt-print]'); if(print)on(print,'click',startReceiptPrint);
-    const more=$('[data-receipt-options]'); if(more)on(more,'click',()=>toggleReceiptOptions());
+    const more=$('[data-receipt-options]'); if(more)on(more,'click',()=>{
+      toggleReceiptOptions();
+      if(!$('#receipt-share-options')?.hidden && (/Android|iPhone|iPad|iPod|Mobile|MicroMessenger|\bQQ\//i.test(root.navigator?.userAgent||'')||document.getElementById('app')?.classList.contains('mobile-landscape')))showImageShareGuide();
+    });
+    const imageGuide=$('[data-image-share-guide]');if(imageGuide)on(imageGuide,'click',event=>{if(event.target===imageGuide)hideImageShareGuide();});
+    const imageDismiss=$('[data-image-share-dismiss]');if(imageDismiss)on(imageDismiss,'click',()=>{hideImageShareGuide();$('[data-share-channel]')?.focus({preventScroll:true});});
+    const imageSave=$('[data-image-share-save]');if(imageSave)on(imageSave,'click',saveShare);
     const guideDismiss=$('[data-guide-dismiss]');if(guideDismiss)on(guideDismiss,'click',()=>dismissReceiptGuide(true));
     on(document,'visibilitychange',()=>{
       if(document.hidden)receiptPrint?.audio?.pause();
@@ -2125,6 +2246,11 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
 
   function onKeydown(event) {
     if (!state) return;
+    const imageGuide=$('[data-image-share-guide]');
+    if(imageGuide&&!imageGuide.hidden){
+      if(event.key==='Escape'){event.preventDefault();hideImageShareGuide();$('[data-receipt-options]')?.focus({preventScroll:true});return;}
+      if(event.key==='Tab'){event.preventDefault();const save=$('[data-image-share-save]'),dismiss=$('[data-image-share-dismiss]');(document.activeElement===save?dismiss:save)?.focus({preventScroll:true});return;}
+    }
     if(receiptGuide?.active){
       if(event.key==='Escape'){event.preventDefault();dismissReceiptGuide(true);return;}
       if(event.key==='Tab'){event.preventDefault();const share=$('[data-report-action="share"]'),skip=$('[data-guide-dismiss]');(document.activeElement===share?skip:share)?.focus({preventScroll:true});return;}
@@ -2146,6 +2272,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   }
 
   function unbind() {
+    hideImageShareGuide();
     dismissReceiptGuide();receiptGuide=null;
     stopReceiptPrint();
     bound.forEach(({ target, type, handler, options }) => target.removeEventListener(type, handler, options));
@@ -2174,6 +2301,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     side = options.face === 'back' || options.tab === 'guide' ? 'back' : 'front';
     hintCancelled = side === 'back';
     shareCanvas = null;
+    receiptCanvas = null;
     shareFile = null;
     shareSelection = null;
     sharePickerDraft = null;
@@ -8241,7 +8369,7 @@ window.PORTRAIT_ASSETS={"主角-举手机亮屏-欣喜":"assets/runtime/5c141c9f
             S.root.insertBefore(S.optionsEl, S.dialog);
         }
     }
-    // 手机框内选项：按内容和可用宽度决定列数，避免最后一行只剩一个按钮。
+    // 使用舞台内的实际宽度，CSS 横屏时不拿物理屏幕宽度计算列数。
     function optionColumns() {
         const buttons = [...S.optionsEl.querySelectorAll('.vn-option')];
         const count = buttons.length;
@@ -8249,14 +8377,14 @@ window.PORTRAIT_ASSETS={"主角-举手机亮屏-欣喜":"assets/runtime/5c141c9f
         const style = getComputedStyle(S.optionsEl), gap = parseFloat(style.columnGap) || 6;
         const avail = Math.max(0, S.optionsEl.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0));
         const weight = text => [...String(text || '')].reduce((n, ch) => n + (/[\x00-\xff]/.test(ch) ? .55 : 1), 0);
-        let need = 120;
+        const fontSize = parseFloat(getComputedStyle(buttons[0]).fontSize) || 14;
+        let need = 132;
         for (const btn of buttons) {
             const title = btn.querySelector('.vn-option-text')?.firstChild?.textContent?.trim() || btn.textContent.trim();
             const hint = btn.querySelector('.vn-option-hint, .vn-option-reason')?.textContent?.trim() || '';
-            need = Math.max(need, Math.min(180, 64 + weight(title) * 15 + weight(hint) * 10));
+            need = Math.max(need, Math.min(192, 42 + weight(title) * fontSize + weight(hint) * 6));
         }
         for (let n = Math.min(3, count); n > 1; n--) {
-            if (count % n === 1) continue;
             if (n * need + (n - 1) * gap <= avail) return n;
         }
         return 1;
@@ -8273,6 +8401,7 @@ window.PORTRAIT_ASSETS={"主角-举手机亮屏-欣喜":"assets/runtime/5c141c9f
                 const cols = optionColumns(), gap = parseFloat(getComputedStyle(S.optionsEl).columnGap) || 6;
                 S.optionsEl.style.setProperty('--option-cols', String(cols));
                 S.optionsEl.style.setProperty('--option-basis', `calc((100% - ${(cols - 1) * gap}px) / ${cols})`);
+                S.optionsEl.dataset.tailWide = String(cols > 1 && S.optionsEl.querySelectorAll('.vn-option').length % cols === 1);
             }
             return;
         }
@@ -17184,7 +17313,7 @@ return `<div class="mini sw4-mini sw5-mini" data-game="snack"><div class="mini-b
         const author = (avatarId, avatarName, name, english, study, bio) => `<article class="author-v11-card"><header class="author-v11-head"><span class="author-v11-mark"><img src="${window.DormArt?.asset(avatarId) || window.DORM_ART_ASSETS?.[avatarId] || ''}" alt="${avatarName}的像素头像" draggable="false"></span><div><h3>${name}</h3><span class="author-v11-english" lang="en">${english}</span></div></header><div class="author-v11-school"><strong>华中师范大学心理学院</strong><p>${study}</p></div><div class="author-v11-bio"><h4>个人简介</h4><p>${bio}</p></div></article>`;
         const authors = author('avatar_partner_m_v5', '暖杏', '王政锠', 'Zhengchang Wang', '2024级 · 应用心理学专业', '关注大语言模型决策、计算建模与「心理学 × 人工智能」，尝试把心理学做成可以玩的东西。')
             + author('avatar_partner_f_v5', '青禾', '何品洁', 'Pinjie He', '2024级 · 应用心理学专业', '华中师范大学心理学院2024级应用心理学专业学生。');
-        modal(`<div class="support-v11 support-v11-about"><header class="support-v11-head"><h2>关于作者 <small style="font-size:.55em;font-weight:400">v18</small></h2></header><div class="support-v11-body"><div class="authors-v11">${authors}</div><section class="author-v11-contact" aria-labelledby="authorContactTitle"><h3 id="authorContactTitle">王政锠的联系入口</h3><div class="support-v11-links"><a href="https://www.zhengchang.wang/" target="_blank" rel="noopener noreferrer"><b>个人主页 <span aria-hidden="true">↗</span></b><span>zhengchang.wang</span></a><a href="https://github.com/wsLuYao" target="_blank" rel="noopener noreferrer"><b>GitHub <span aria-hidden="true">↗</span></b><span>@wsLuYao</span></a><a href="mailto:3038698603@qq.com"><b>邮箱</b><span>3038698603@qq.com</span></a></div></section><details class="support-v11-notes"><summary>关于本作、版权与素材</summary><div><p>这是一款心理科普与自我觉察向的互动小游戏，不构成心理诊断、治疗或专业建议。</p><p>© 2026 王政锠 · 华中师范大学心理学院。除特别注明外，游戏代码、文字与像素美术由作者原创；HUD 部分图标来自 Pixelarticons（MIT License）。</p><p>本仓库公开展示，未向项目原创内容授予开源或其他开放使用许可。未经相应权利人事先书面许可，禁止复制、改编、分发、重新部署或商业使用游戏代码、文字、图片及音频等内容；法律规定的例外、GitHub 平台条款允许的查看与 fork，以及第三方素材自身许可另行适用。</p><p>可通过本游戏提供的功能，保存与分享自己生成的充电小票用于个人非商业体验交流；这不授予提取素材、复制游戏或重新部署的许可。<a href="COPYRIGHT.md" target="_blank" rel="noopener noreferrer">完整版权与使用声明</a> · <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">第三方素材声明</a></p></div></details></div></div>`);
+        modal(`<div class="support-v11 support-v11-about"><header class="support-v11-head"><h2>关于作者 <small style="font-size:.55em;font-weight:400">v19</small></h2></header><div class="support-v11-body"><div class="authors-v11">${authors}</div><section class="author-v11-contact" aria-labelledby="authorContactTitle"><h3 id="authorContactTitle">王政锠的联系入口</h3><div class="support-v11-links"><a href="https://www.zhengchang.wang/" target="_blank" rel="noopener noreferrer"><b>个人主页 <span aria-hidden="true">↗</span></b><span>zhengchang.wang</span></a><a href="https://github.com/wsLuYao" target="_blank" rel="noopener noreferrer"><b>GitHub <span aria-hidden="true">↗</span></b><span>@wsLuYao</span></a><a href="mailto:3038698603@qq.com"><b>邮箱</b><span>3038698603@qq.com</span></a></div></section><details class="support-v11-notes"><summary>关于本作、版权与素材</summary><div><p>这是一款心理科普与自我觉察向的互动小游戏，不构成心理诊断、治疗或专业建议。</p><p>© 2026 王政锠 · 华中师范大学心理学院。除特别注明外，游戏代码、文字与像素美术由作者原创；HUD 部分图标来自 Pixelarticons（MIT License）。</p><p>本仓库公开展示，未向项目原创内容授予开源或其他开放使用许可。未经相应权利人事先书面许可，禁止复制、改编、分发、重新部署或商业使用游戏代码、文字、图片及音频等内容；法律规定的例外、GitHub 平台条款允许的查看与 fork，以及第三方素材自身许可另行适用。</p><p>可通过本游戏提供的功能，保存与分享自己生成的充电小票用于个人非商业体验交流；这不授予提取素材、复制游戏或重新部署的许可。<a href="COPYRIGHT.md" target="_blank" rel="noopener noreferrer">完整版权与使用声明</a> · <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">第三方素材声明</a></p></div></details></div></div>`);
 
     }
 

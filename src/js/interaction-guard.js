@@ -30,7 +30,7 @@
  scan(doc.body);root.addEventListener('resize',()=>queue(doc.body));
  let start=null;
  function scrollOwner(target){for(let e=target;e&&e!==app;e=e.parentElement){if(e.hasAttribute?.('data-scroll-y')&&e.scrollHeight>e.clientHeight+1)return e;}return null;}
- doc.addEventListener('touchstart',e=>{const t=e.touches[0];start=t?{x:t.clientX,y:t.clientY,owner:scrollOwner(e.target),native:editable(e.target),custom:gesture(e.target),rotated:!!e.target.closest?.('#app.is-rotated')}:null;},{passive:true});
+ doc.addEventListener('touchstart',e=>{const t=e.touches[0],owner=scrollOwner(e.target);start=t?{x:t.clientX,y:t.clientY,owner,scrollTop:owner?.scrollTop||0,native:editable(e.target),custom:gesture(e.target),rotated:!!e.target.closest?.('#app.is-rotated')}:null;},{passive:true});
  doc.addEventListener('touchmove',e=>{
   if(!start)return;
   if(e.touches.length>1){prevent(e);return;}
@@ -38,8 +38,11 @@
   const t=e.touches[0];if(!t)return;
   const physicalX=t.clientX-start.x,physicalY=t.clientY-start.y,dx=start.rotated?physicalY:physicalX,dy=start.rotated?-physicalX:physicalY,o=start.owner;
   if(!o){prevent(e);return;}
-  if(Math.abs(dx)>Math.abs(dy)+3){prevent(e);return;}
-  if((dy>0&&o.scrollTop<=0)||(dy<0&&o.scrollTop+o.clientHeight>=o.scrollHeight-1))prevent(e);
+  // touch-action is measured in browser axes, not the rotated game's axes.
+  // Scroll only the chosen reading pane ourselves so CSS landscape never traps the last option.
+  if(!start.axis&&Math.max(Math.abs(dx),Math.abs(dy))>6)start.axis=Math.abs(dy)>=Math.abs(dx)?'y':'x';
+  if(start.axis==='y')o.scrollTop=Math.max(0,Math.min(o.scrollHeight-o.clientHeight,start.scrollTop-dy));
+  prevent(e);
  },{passive:false});
  doc.addEventListener('touchend',()=>start=null,{passive:true});
  doc.addEventListener('touchcancel',()=>start=null,{passive:true});

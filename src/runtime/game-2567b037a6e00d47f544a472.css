@@ -13030,8 +13030,13 @@ h1 em {
 #report[data-rp-mode][data-rp-fit] .report-shell .report-flip-button { min-height: 44px; font-size: clamp(11px,1.7cqw,17px); }
 #report[data-rp-mode][data-rp-fit] .report-shell .report-footer { height: 44px; min-height: 0; margin: 0; }
 #report[data-rp-mode][data-rp-fit] .report-shell .report-footer-note { display: none; }
-#report[data-rp-mode][data-rp-fit] .report-shell .report-actions { width: 100%; flex-wrap: nowrap; gap: var(--rv-gap); justify-content: flex-end; }
+#report[data-rp-mode][data-rp-fit] .report-shell .report-actions { width: 100%; min-width: 0; flex-wrap: nowrap; gap: var(--rv-gap); justify-content: flex-end; }
 #report[data-rp-mode][data-rp-fit] .report-shell .report-actions .report-button { height: 44px; min-height: 44px; padding: 4px clamp(7px,1.2cqw,18px); font-size: clamp(12px,1.65cqw,19px); }
+
+/* Five footer actions must fit the logical landscape width, including CSS rotation. */
+#report[data-rp-fit="viewport"] .report-shell .report-actions{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,.85fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.65fr)}
+#report[data-rp-fit="viewport"] .report-shell .report-actions .report-button{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;justify-content:center;font-size:clamp(11px,1.6cqw,15px);line-height:1.25;padding:4px 6px}
+#report[data-rp-fit="viewport"] .report-shell .report-actions .report-icon{width:15px;height:15px;flex-shrink:0}
 
 /* The previous desktop #report-front rule must not top-pack this flexible row. */
 #report[data-rp-mode][data-rp-fit] .report-shell #report-front .report-profile-grid { align-content: stretch; }
@@ -14519,7 +14524,7 @@ h1 em {
 
 /* 出现选项时不再单独占用上方画面，而是直接嵌进底部对话框。 */
 #app.mobile-landscape #vn-dialog.has-options {
-    max-height: min(52%, 240px)
+    max-height: min(68%, 276px)
 }
 
 #app.mobile-landscape #vn-dialog.has-options .vn-line {
@@ -14532,7 +14537,7 @@ h1 em {
     display: none
 }
 
-#app.mobile-landscape .vn-dialog>.vn-options {
+#app.mobile-landscape #vn-dialog>.vn-options {
     position: static;
     left: auto;
     bottom: auto;
@@ -14545,33 +14550,42 @@ h1 em {
     padding: 0 2px 2px;
     flex: 1 1 auto;
     z-index: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(var(--option-cols, 1), minmax(0, 1fr));
+    grid-auto-rows: minmax(44px, max-content);
     align-content: flex-start;
     gap: 6px;
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: #b39364 transparent
 }
 
-#app.mobile-landscape .vn-dialog>.vn-options .vn-option {
-    flex: 0 0 var(--option-basis, 100%);
-    max-width: var(--option-basis, 100%);
-    min-width: 0
+#app.mobile-landscape #vn-dialog>.vn-options .vn-option {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    align-self: stretch
 }
 
 /* 原有的“最后一项通栏”会破坏等宽，手机框内取消。 */
-#app.mobile-landscape .vn-dialog>.vn-options .vn-option:last-child {
+#app.mobile-landscape #vn-dialog>.vn-options .vn-option:last-child {
     grid-column: auto
 }
 
-#app.mobile-landscape .vn-dialog>.vn-options .vn-choice-info {
-    flex: 0 0 100%;
+#app.mobile-landscape #vn-dialog>.vn-options[data-tail-wide="true"] .vn-option:last-child,
+#app.mobile-landscape #vn-dialog>.vn-options .vn-choice-info {
+    grid-column: 1 / -1;
     width: 100%;
     margin-bottom: 0
 }
+
+#app.mobile-landscape .vn-option-text { min-width: 0; }
+#app.mobile-landscape .vn-option-index { flex-shrink: 0; }
 
 #app.mobile-landscape #modal.vn-scene .vn-dialog {
     width: var(--vn-dialog-w);
@@ -14579,7 +14593,7 @@ h1 em {
 }
 
 #app.mobile-landscape #modal.vn-scene #vn-dialog.has-options {
-    max-height: min(52%, 240px)
+    max-height: min(68%, 276px)
 }
 
 #app.mobile-landscape .vn-close {
@@ -21616,9 +21630,44 @@ h1 em {
 #report .receipt-guide-bubble p{margin:6px 0 8px}
 #report .receipt-guide-bubble button{display:block;margin-left:auto;min-height:44px;padding:8px 0 4px;border:0;background:transparent;box-shadow:none;color:#62705e;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 #report .receipt-guide-bubble button:focus-visible{outline:2px solid var(--receipt-dark,#46643b);outline-offset:2px}
-#report [data-report-action="share"] span{white-space:nowrap}
+#report [data-report-action="share"] span{white-space:normal}
 @keyframes receipt-guide-glow{50%{outline-color:#ffcf58;border-color:#fffbe8}}
 @media(prefers-reduced-motion:reduce){#report .receipt-guide-focus{animation:none}}
+
+/* The exported keepsake is square; the printer still feeds its horizontal paper. */
+#report .square-share-label{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--receipt-dark);text-align:center}
+#report .image-share-guide{position:absolute;inset:0;z-index:100;display:grid;place-items:center;padding:70px 24px 20px;background:#172319d9;animation:image-share-appear .18s ease-out}
+#report .image-share-guide-content{width:min(850px,100%);height:min(490px,100%);min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.95fr);align-items:center;gap:32px;color:#fff9e8}
+#report .image-share-guide-content>img{display:block;width:100%;height:100%;max-height:100%;min-height:0;object-fit:contain;filter:drop-shadow(5px 7px 0 #0003);-webkit-touch-callout:default!important}
+#report .image-share-guide-copy{min-width:0}
+#report .image-share-guide-copy h2{margin:0 0 18px;font-size:clamp(20px,2.5cqw,30px);line-height:1.4;color:#fff9e8}
+#report .image-share-guide-copy p{margin:0 0 12px;font-size:clamp(16px,1.8cqw,22px);line-height:1.65;color:#fff9e8}
+#report .image-share-guide-copy .image-share-note{color:#d7ddc9;font-size:clamp(12px,1.45cqw,16px)}
+#report .image-share-guide-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+#report .image-share-guide-actions button{min-height:44px;min-width:0;padding:10px 14px;white-space:normal;border:2px solid #e2e6c5;background:#fff8df;color:var(--receipt-dark);font-size:15px;font-weight:700;box-shadow:3px 3px 0 #0004}
+#report .image-share-guide-actions button+button{color:#fff8df;background:transparent}
+#report .image-share-menu-cue{position:absolute;top:8px;right:10px;width:170px;height:133px;color:#f5d77f;pointer-events:none}
+#report .image-share-menu-cue span{position:absolute;right:0;top:0;display:grid;place-items:center;width:52px;height:34px;border:2px dashed #fff5d7;color:#fff5d7;font-size:26px;line-height:1}
+#report .image-share-menu-cue svg{position:absolute;inset:20px 4px 0 auto;width:150px;height:112px;fill:none;stroke:currentColor;stroke-width:6;transform:scaleX(-1);shape-rendering:crispEdges}
+#report .image-share-guide.menu-at-left .image-share-menu-cue{left:10px;right:auto}
+#report .image-share-guide.menu-at-left .image-share-menu-cue span{left:0;right:auto}
+#report .image-share-guide.menu-at-left .image-share-menu-cue svg{left:4px;right:auto;transform:none}
+#report[data-rp-fit="viewport"] .image-share-guide{padding:54px 28px 12px}
+#report[data-rp-fit="viewport"] .image-share-guide-content{height:100%;grid-template-columns:minmax(170px,.9fr) minmax(210px,1.1fr);gap:24px;max-width:720px}
+#report[data-rp-fit="viewport"] .image-share-guide-copy h2{font-size:20px;margin-bottom:10px}
+#report[data-rp-fit="viewport"] .image-share-guide-copy p{font-size:16px;margin-bottom:8px}
+#report[data-rp-fit="viewport"] .image-share-guide-copy .image-share-note{font-size:12px}
+#report[data-rp-fit="viewport"] .image-share-guide-actions{margin-top:12px}
+#report[data-rp-fit="viewport"] .image-share-guide-actions button{font-size:13px;padding:8px 10px}
+#report[data-rp-mode="portrait"] .image-share-guide-content{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:16px}
+#report[data-rp-mode="portrait"] .image-share-guide-copy{text-align:center}
+#report[data-rp-mode="portrait"] .image-share-guide-actions{justify-content:center}
+#report .r16-actions .report-button{max-width:100%;min-width:0}
+#report[data-rp-fit="viewport"] .r16-actions .r16-save{min-width:0;flex:0 1 180px}
+#report[data-rp-fit="viewport"] .r16-actions .r16-collapse{min-width:0;flex:0 1 84px}
+#report[data-rp-fit="viewport"] .r16-actions .r16-share-toggle{min-width:0;flex:0 1 62px}
+@keyframes image-share-appear{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){#report .image-share-guide{animation:none}}
 
 /* interaction-guard.css */
 /* Browser gestures belong to the stage; reading panes own vertical scrolling. */
@@ -21642,6 +21691,10 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 #app *::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border:1px solid var(--scroll-track);border-radius:0}
 #app *::-webkit-scrollbar-corner{background:var(--scroll-track)}
 #app :is(.tabs,#navspots){flex-wrap:wrap;overflow-x:hidden}
+#app :is(.actions-row,.vn-controls){flex-wrap:wrap;min-width:0}
+#app :is(.actions-row,.vn-controls)>:is(button,a){min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#app :is(.choices,.env-options,.call-options,.report-actions){min-width:0}
+#app :is(.choices,.env-options,.call-options,.report-actions)>button{min-width:0;white-space:normal;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){#app button:active{transition:none}}
 
 /* resource-loader.css */

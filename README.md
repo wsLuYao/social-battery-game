@@ -7,7 +7,7 @@
   <a href="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml"><img alt="静态验证" src="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml/badge.svg"></a>
   <img alt="HTML · CSS · JavaScript" src="https://img.shields.io/badge/Web-HTML%20%2F%20CSS%20%2F%20JS-c7a15c">
   <img alt="存档保存在浏览器" src="https://img.shields.io/badge/Save-LocalStorage-8f83ad">
-  <img alt="当前版本 v18" src="https://img.shields.io/badge/Release-v18-d7947d">
+  <img alt="当前版本 v19" src="https://img.shields.io/badge/Release-v19-d7947d">
   <p><strong>聚会可以尽兴，离场可以从容，独处也可以好好充电。</strong></p>
   <p><a href="https://wsluyao.github.io/social-battery-game/">立即游玩</a> · <a href="#它能做什么">玩法介绍</a> · <a href="docs/deployment.md">部署说明</a></p>
 </div>
@@ -18,7 +18,7 @@
 
 ![游戏封面与角色选择](docs/screenshots/cover.jpg)
 
-**当前版本：[v18 · 2026-11-16](version.json)**
+**当前版本：[v19 · 2026-11-17](version.json)**
 
 ## 它能做什么
 
@@ -31,7 +31,7 @@
 | 三种离场路线 | 提前回去、散步告别、面馆夜宵，体验各自的过渡剧情 |
 | 宿舍充电 | 电脑、手机、音乐、零食、静坐与猫咪陪伴等互动 |
 | 今晚的充电说明书 | 双面翻卡展示经历、角色解读和可尝试的相处建议 |
-| 充电小票 | 热敏打印演出、横向票据、当晚印记、二维码与图片保存 |
+| 充电小票 | 横向出票演出、1200×1200 方形分享图、当晚印记与二维码 |
 | 角色图鉴 | 通过不同的游玩选择，逐步解锁六种相处角色 |
 | 本地存档 | 自动保存进度，刷新后可以继续这一晚 |
 
@@ -122,21 +122,21 @@ flowchart LR
 - **对应本局的相处角色**：角色像素形象、专属配色、角色寄语和标签共同呈现这一晚的社交节奏。
 - **回看当晚电量**：展示离场电量与今晚最低电量，帮助玩家把结果与自己的行动连起来。
 - **收藏经历印记**：小票根据当晚实际发生的事件点亮印记，区分这一晚的经历与长期累计的角色图鉴。
-- **保存一致的画面**：预览、PNG 保存和系统图片分享使用同一张小票画布，便于收藏与发送。
+- **保存一致的画面**：横向出票预览保留打印机演出；PNG 保存、系统图片分享与长按保存统一使用 1200×1200 方形图片，保留整台打印机和精选 4 枚印记。
 - **邀请朋友来体验**：票据附游戏二维码；分享入口提供微信、朋友圈、QQ、QQ 空间及链接等路径，并根据设备能力提供系统分享、网页入口、保存图片或复制文案。
 
-下面是 **v18 实际小票组件的页面截图**，使用游戏自带示例记录与示例印记演示“提前预约型充电猫”，不代表真实玩家测评结果。
+下面是 **v19 实际小票打印与分享页面**，使用游戏自带示例记录与示例印记演示。
 
-![v18 充电小票打印完成并展开分享选项](docs/screenshots/receipt-share-v18.jpg)
-
-*打印完成后，可保存小票，或展开朋友圈、微信好友、QQ 好友、QQ 空间和复制链接等入口。*
+![v19 实际保存的1200×1200方形小票示例](docs/screenshots/receipt-square-v19.png)
 
 <details>
-<summary>查看仅打印完成的页面</summary>
+<summary>查看手机横屏模式下的打印与分享页面截图</summary>
 
-![v18 充电小票打印完成页面](docs/screenshots/receipt-print-v18.jpg)
+![v19 手机CSS横屏分享界面（随屏幕方向旋转）](docs/screenshots/receipt-share-v19.jpg)
 
 </details>
+
+*预览保留横向出票；保存和图片分享采用 1200×1200 方形 PNG，精选 4 枚当晚印记。*
 
 小票从本局数据到分享的过程：
 
@@ -145,8 +145,9 @@ flowchart LR
     A[本局角色、电量与经历印记] --> B[生成横向小票]
     B --> C[像素打印机送纸与音效]
     C --> D[预览并展开分享选项]
-    D --> E[保存 PNG]
-    D --> F[系统分享或平台入口]
+    D --> S[生成 1200×1200 方形分享图]
+    S --> E[保存 PNG]
+    S --> F[系统图片分享或保存引导]
     D --> G[复制链接与文案]
     F --> H[玩家确认发送]
 ```
@@ -197,7 +198,7 @@ python -m http.server 8000
 └── .nojekyll                  # GitHub Pages 静态发布标记
 ```
 
-当前版本为 **v18 · 2026-11-16**，基于选项与关于页更新部署包，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
+当前版本为 **v19 · 2026-11-17**，基于手机适配与方形小票部署包，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
 
 ## 验证与部署
 

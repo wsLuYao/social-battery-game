@@ -12,7 +12,7 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
-**Current release: [v18 · 2026-11-16](version.json)**
+**Current release: [v19 · 2026-11-17](version.json)**
 
 ## What you can do
 
@@ -60,20 +60,13 @@ flowchart TD
 
 ## A receipt of the evening
 
-The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure and minimum energy, and stamps from events in the current playthrough. Preview, PNG export, and native image sharing use the same receipt canvas. Its QR code links to the official game.
+The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure and minimum energy, and stamps from events in the current playthrough. The printing preview remains horizontal. PNG export, native image sharing, and long-press saving use the same 1200×1200 square image with the printer and four selected stamps. Its QR code links to the official game.
 
 Sharing adapts to the device: system image sharing, QQ web links, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
-![v18 receipt printing and sharing controls](docs/screenshots/receipt-share-v18.jpg)
+![v19 exported 1200×1200 square receipt](docs/screenshots/receipt-square-v19.png)
 
-*Screenshot of the actual v18 receipt component, using the game’s built-in sample records and example stamps. This illustrates the interface rather than a real player assessment.*
-
-<details>
-<summary>View the printed receipt before opening sharing options</summary>
-
-![v18 printed receipt](docs/screenshots/receipt-print-v18.jpg)
-
-</details>
+*Actual v19 component with sample records. Printing remains horizontal; saved and shared images use a 1200×1200 square layout with four selected stamps.*
 
 ## Run locally
 
@@ -109,7 +102,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-The current release is **v18 · November 16, 2026**, based on the options and About-page update bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v19 · November 17, 2026**, based on the mobile adaptation and square receipt bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 
