@@ -7,12 +7,14 @@
   <a href="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml"><img alt="静态验证" src="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml/badge.svg"></a>
   <img alt="HTML · CSS · JavaScript" src="https://img.shields.io/badge/Web-HTML%20%2F%20CSS%20%2F%20JS-c7a15c">
   <img alt="存档保存在浏览器" src="https://img.shields.io/badge/Save-LocalStorage-8f83ad">
-  <img alt="发布版本 v17" src="https://img.shields.io/badge/Release-v17-d7947d">
+  <img alt="选项与关于页更新" src="https://img.shields.io/badge/Release-2026.11.16-d7947d">
   <p><strong>聚会可以尽兴，离场可以从容，独处也可以好好充电。</strong></p>
   <p><a href="https://wsluyao.github.io/social-battery-game/">立即游玩</a> · <a href="#它能做什么">玩法介绍</a> · <a href="docs/deployment.md">部署说明</a></p>
 </div>
 
 > 用 5—10 分钟，走过像素校园里的一晚：加入聚会、决定何时告别，回到宿舍做一点让自己恢复能量的小事，最后带走一张属于今晚的“充电小票”。
+
+> **版权与使用**：本仓库公开展示，项目原创内容未授予开源或其他开放使用许可。未经相应权利人事先书面许可，禁止复制、分发、重新部署或商业使用。个人游玩与游戏内小票分享、GitHub 平台规则及第三方素材许可的具体范围见 [版权与使用声明](COPYRIGHT.md)。
 
 ![游戏封面与角色选择](docs/screenshots/cover.jpg)
 
@@ -60,6 +62,37 @@ flowchart LR
 
 六种相处角色分别是：**提前预约型充电猫、熟人旁边的暖手宝、散步续航员、耳机里的小岛居民、屏幕漫游小水母、今晚准点下线的人**。它们描述的是这一晚的游戏经历，玩家可以重玩，尝试不同的相处和恢复方式。
 
+## 心理学怎样融入玩法
+
+作品把“社交电池”作为可见的游戏隐喻：每次聊天、参与活动、告别和休息，都留下时间与电量记录，让玩家回看自己这一晚怎样投入、何时停下、选择什么方式恢复。游戏允许玩家尝试不同路线，再从经历回到具体的自我提问：“我现在还想继续吗？”“哪种陪伴让我舒服？”“我可以怎样说出休息的需要？”
+
+六种角色将游戏经历连接到六个设计参考。下表说明的是游戏怎样使用这些概念；角色结果由本局选择生成，电量数值由游戏规则设定，不是研究中的测量值。
+
+| 相处角色 | 心理学设计参考 | 在游戏中的表达 |
+| --- | --- | --- |
+| 提前预约型充电猫 | 执行意图 | 提前问清聚会时长，为告别约定具体节点，并提供可以直接说出口的句子 |
+| 熟人旁边的暖手宝 | 社会基线理论 | 把熟悉同伴和宿舍通话设计为陪伴入口，让玩家探索怎样的关系与交流更舒适 |
+| 散步续航员 | 共同活动与人际印象 | 用并肩散步承接散场后的相处，让轻量共同活动成为继续交流的方式 |
+| 耳机里的小岛居民 | 自主独处与情绪调节 | 提供主动选择安静、听歌和暂停的空间，之后仍可重新加入交流 |
+| 屏幕漫游小水母 | 心境管理 | 让玩家选择轻松内容，并在观看后停一下，留意当下感受再决定下一步 |
+| 今晚准点下线的人 | 心理脱离 | 将工作恢复研究中的“暂时放下”类比到社交消息，为结束回应、约定明天再聊提供表达 |
+
+充电说明书按“本局经历—概念解释—可尝试的小行动”组织，并提供研究来源与适用范围。散步、听歌、短视频和暂缓回复等安排属于场景化设计，不表示这些活动具有固定的恢复效果。完整来源入口保留在游戏说明书中；相关设计参考也包括 [Gollwitzer 与 Brandstätter（1997）](https://sparq.stanford.edu/sites/g/files/sbiybj19021/files/media/file/gollwitzer_brandstatter_1997_-_implementation_intentions_effective_goal_pursuit.pdf)、[Coan 与 Sbarra（2015）](https://pubmed.ncbi.nlm.nih.gov/25825706/)、[Cheng 等（2020）](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0227880)、[Nguyen 等（2018）](https://journals.sagepub.com/doi/10.1177/0146167217733073)、[Bryant 与 Zillmann（1984）](https://doi.org/10.1080/08838158409386511)和 [Sonnentag 与 Bayer（2005）](https://pubmed.ncbi.nlm.nih.gov/16248688/)。
+
+## 把这一晚打印成充电小票
+
+完成一晚后，玩家可以在充电说明书中选择**打印我的“充电小票”**。像素打印机以送纸动画和柔和打印声，将游戏中的经历变成一张可以保存的横向票据，让一次体验留下可回看、可交流的纪念。
+
+- **对应本局的相处角色**：角色像素形象、专属配色、角色寄语和标签共同呈现这一晚的社交节奏。
+- **回看当晚电量**：展示离场电量与今晚最低电量，帮助玩家把结果与自己的行动连起来。
+- **收藏经历印记**：小票根据当晚实际发生的事件点亮印记，区分这一晚的经历与长期累计的角色图鉴。
+- **保存一致的画面**：预览、PNG 保存和系统图片分享使用同一张小票画布，便于收藏与发送。
+- **邀请朋友来体验**：票据附游戏二维码；分享入口提供微信、朋友圈、QQ、QQ 空间及链接等路径，并根据设备能力提供系统分享、网页入口、保存图片或复制文案。
+
+手机系统和应用支持情况会影响分享方式；网页不会自动向联系人发送内容，最终发送由玩家确认。微信内可使用右上角菜单分享链接，或保存小票后从相册发送。分享链接不携带浏览器存档；玩家主动分享的小票会展示本局结果。
+
+允许通过游戏提供的功能保存和分享自己生成的小票，用于个人非商业体验交流；独立素材提取、完整游戏分发、重新部署和商用仍需另行授权，具体见 [版权与使用声明](COPYRIGHT.md)。
+
 ## 界面预览
 
 ![校园聚会与场景互动](docs/screenshots/party.jpg)
@@ -101,7 +134,7 @@ python -m http.server 8000
 └── .nojekyll                  # GitHub Pages 静态发布标记
 ```
 
-当前仓库以 **2026-11-16 v17 网站部署包**为基础，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
+当前仓库使用 **2026-11-16 选项与关于页更新部署包**，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
 
 ## 验证与部署
 
@@ -117,9 +150,9 @@ node tools/validate.mjs
 
 ## 关于作品
 
-作者：[王政锠 · Luyout Wang](https://github.com/wsLuYao)。欢迎通过 [Issues](https://github.com/wsLuYao/social-battery-game/issues) 反馈体验问题，并注明设备、浏览器和发生问题的步骤。
+作者：王政锠（Zhengchang Wang）、何品洁（Pinjie He），华中师范大学心理学院。项目维护：[wsLuYao](https://github.com/wsLuYao)。欢迎通过 [Issues](https://github.com/wsLuYao/social-battery-game/issues) 反馈体验问题，并注明设备、浏览器和发生问题的步骤。
 
-代码及图片、音频等素材的使用授权由作者另行说明。
+**项目原创内容保留所有权利，未授予开源或其他开放使用许可。**未经相应权利人事先书面许可，禁止复制、分发、重新部署或商业使用。第三方图标保留其自身许可，详见 [版权与使用声明](COPYRIGHT.md)和 [第三方素材声明](THIRD_PARTY_NOTICES.md)。
 
 <div align="center">
   <sub>给相处留一点余裕，也给自己留一点电。</sub>

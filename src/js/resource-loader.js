@@ -67,13 +67,21 @@
   });
   r.received=r.bytes;
  }
+ async function font(r,blob){
+  r.phase='decode';changed();
+  if(typeof root.FontFace!=='function'||!doc.fonts)throw Object.assign(Error('浏览器不支持游戏字体，请更新浏览器后重试'),{code:'decode'});
+  const face=new root.FontFace(r.fontFamily,await blob.arrayBuffer(),{weight:r.fontWeight||'400',style:'normal',display:'block'});
+  await face.load();
+  if(r.controller.signal.aborted)throw Error('准备已中断');
+  doc.fonts.add(face);r.fontFace=face;
+ }
  async function run(r){
   r.attempt=(r.attempt||0)+1;r.controller=new AbortController();r.preempted=false;changed();
   try{
    for(const dep of r.deps||[])await task(records.get(dep),r.priority);
    await timeout((async()=>{
     if(r.type==='script'||r.type==='style')await code(r);
-    else{const blob=await binary(r);if(r.type==='image')await pixels(r,blob);else{if(r.controller.signal.aborted)throw Error('准备已中断');r.objectURL=URL.createObjectURL(blob);urls.set(r.objectURL,r.id);}}
+    else{const blob=await binary(r);if(r.type==='image')await pixels(r,blob);else if(r.type==='font')await font(r,blob);else{if(r.controller.signal.aborted)throw Error('准备已中断');r.objectURL=URL.createObjectURL(blob);urls.set(r.objectURL,r.id);}}
    })(),M.timeoutMs||32000,()=>{r.timedOut=true;r.controller.abort();});
    r.status='ready';r.phase='ready';r.error=null;if(r.cssVar&&r.objectURL)doc.documentElement.style.setProperty(r.cssVar,'url("'+r.objectURL+'")');r.ok?.(r);
   }catch(error){
@@ -124,6 +132,9 @@
   if(Date.now()-v.lastProgress>8000&&!failed)text='仍在准备'+(s.current?'「'+s.current.label+'」':'场景')+'，网络较慢时可能需要稍等。';
   if(failed){const err=failed.error;text=(root.navigator?.onLine===false?'网络已断开，请恢复连接后重试。':err?.code==='timeout'?'连接超时，请重试。':err?.code==='decode'?'画面文件未能打开，请重试。':'素材未能载入，请重试。')+' 已准备好的部分会保留。';}
   el.querySelector('[data-load-status]').textContent=text;
+  let duration=el.querySelector('[data-load-duration]');
+  if(!duration){duration=doc.createElement('p');duration.className='scene-load-duration';duration.setAttribute('data-load-duration','');el.querySelector('.scene-load-actions').before(duration);}
+  duration.textContent='加载可能需要约 1 分钟，请耐心等待。';
   el.querySelector('.scene-load-actions').hidden=!failed;
   return s;
  }

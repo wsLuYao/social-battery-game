@@ -1,31 +1,34 @@
-# 部署与更新
+# GitHub Pages 发布配置
 
-在线地址：<https://wsluyao.github.io/social-battery-game/>
+当前网址：<https://wsluyao.github.io/social-battery-game/>
 
-## GitHub Pages
+仓库保持公开，Pages 从 `main` 分支的根目录发布。根目录保留 `.nojekyll`；提交前执行 `node tools/validate.mjs`。本仓库未向原创内容授予开放使用许可，见 [版权与使用声明](../COPYRIGHT.md)。
 
-1. 将网站文件放在仓库根目录，保留 `index.html`、`game.html`、`src/` 和 `assets/` 的相对位置。
-2. 在仓库 **Settings → Pages** 中选择 **Deploy from a branch**。
-3. 发布分支选择 **main**，目录选择 **/(root)**，保存。
-4. 保留根目录的 `.nojekyll`，让发布过程直接使用已经准备好的静态文件。
+本次基于“社交电池-部署包-选项与关于页更新-20261116.zip”更新运行文件，保留选项与双作者关于页，并同步小票二维码、canonical 地址、运行文件哈希、资源清单和缓存版本。版权说明同时显示于游戏关于页。
 
-以后向 `main` 提交更新，Pages 会重新发布。设置方法可参阅 [GitHub 官方说明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
+以下保留原部署包说明；其中构建脚本和离线版属于原开发工程，未随此网站部署包提供。
 
-## 更新内容
+# 网站部署说明
 
-先在本地运行 `node tools/validate.mjs`，再提交并推送。资源清单记录了运行文件的地址和字节大小；替换资源时需要同步更新 `src/runtime/manifest.js`，并更新入口文件的资源版本号。
+1. 在项目根目录运行 `python tools/build.py`。
+2. 解压生成的 `dist/website.zip`。
+3. 将 `index.html`、`game.html`、`src`、`assets` 保持相对位置上传到静态网站。
+4. 访问网站的 `index.html` 或 `game.html`。
 
-本次发布相对 v17 原包的调整：
+本次 GitHub Pages 发布中的小票二维码指向 `https://wsluyao.github.io/social-battery-game/`。部署包只含当前运行文件，不含历史版本、原始素材、开发预览和测试。
 
-- 新增中英文 README、项目封面、游戏截图与静态验证。
-- 新增 GitHub Pages 发布标记和入口描述信息。
-- 将充电小票二维码与页面 canonical 地址设置为本仓库的在线游戏地址。
-- 更新修改后的运行文件名称、资源大小和版本号。
+离线分享使用 `dist/offline.html`，可单独发送并双击打开，不需要一起上传。
 
-`部署说明_v17.md` 保留了原包的更新记录。其中提到的离线构建工具属于原开发工程，不包含在此发布仓库中。
+每次构建覆盖同一份最新部署包和离线版，更新缓存版本，并清理不再引用的旧哈希资源。不能只上传 HTML，必须同时上传包内对应脚本、样式和素材。
 
-## 更换域名或部署路径
+打开游戏后先准备全部资源，再显示完整封面。正式游玩不重复弹出场景加载页。当前版本保留六角色小票配色、3 秒打印引导及柔和打印音效。
 
-页面运行时的资源路径是相对路径，可以部署在子目录。迁移时需要同步修改两个 HTML 入口的 canonical 地址，以及运行包中的 `SHARE_GAME_QR` 内容并重新生成二维码矩阵。修改运行包后，需同步更新资源清单中的名称与大小。
+## 分享方式
 
-浏览器存档按网站来源隔离。换域名、端口或设备后，原存档不会自动迁移。
+- 在线版优先分享当前网站的入口；离线版或本地预览分享 `https://wsluyao.github.io/social-battery-game/`，不会发送本地路径或存档。
+- 手机普通浏览器优先调用系统分享，把本局小票 PNG 交给玩家选择的微信或 QQ。设备未安装相应应用时，可保存图片、复制链接。
+- 在 QQ 内打开时，尝试使用 QQ 官方客户端接口，区分好友、空间、微信好友和朋友圈；客户端接口不可用时保留网页入口与图片分享。
+- 电脑端的 QQ 好友、QQ 空间打开对应分享网页，并提供可再次点击的入口，避免窗口受限后按钮无反馈。
+- 微信内使用右上角菜单分享游戏链接；本局小票支持长按保存后从相册发送。GitHub Pages 是纯静态托管，未配置公众号 JS 安全域名和签名服务，不能直接用网页按钮指定微信好友。页面不会把打开菜单当成已经发送成功。
+
+完成最终发送需要玩家在系统或应用里确认。QQ、微信的登录态、客户端版本及网络限制需要在目标手机上复核。

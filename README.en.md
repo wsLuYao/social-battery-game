@@ -8,6 +8,8 @@
 
 > Spend 5–10 minutes navigating a campus gathering, choosing how to leave, and settling into a quiet dorm evening. Finish with a personal recharge guide and a printable receipt of the night's experiences.
 
+> **Copyright:** This is a public showcase repository. No open-source or other open-use license is granted for the project’s original content. Copying, redistribution, redeployment, and commercial use require prior written permission, subject to the exceptions described in [COPYRIGHT.md](COPYRIGHT.md).
+
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
 ## What you can do
@@ -36,6 +38,18 @@ Open **[the online game](https://wsluyao.github.io/social-battery-game/)**. No a
 - **Return visit:** Continue from the title screen using the same browser and address.
 
 ![Campus gathering](docs/screenshots/party.jpg)
+
+## Psychology in the design
+
+The energy meter makes the evening’s choices visible: players can revisit how they joined activities, said goodbye, and chose rest or companionship. Six characters connect these choices to implementation intentions, social baseline theory, shared activities and interpersonal impressions, autonomous solitude and emotion regulation, mood management, and psychological detachment.
+
+The recharge guide connects a game event to a concept, a small action to try, and a research reference with its scope. These are contextual design applications; the energy values are game rules, and the roles are not validated personality categories. Applying work-recovery ideas to social messages is an analogy rather than a directly tested result.
+
+## A receipt of the evening
+
+The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure and minimum energy, and stamps from events in the current playthrough. Preview, PNG export, and native image sharing use the same receipt canvas. Its QR code links to the official game.
+
+Sharing adapts to the device: system image sharing, QQ web links, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
 ## Run locally
 
@@ -71,7 +85,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-This repository is based on the November 16, 2026 v17 deployment bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+This repository is based on the November 16, 2026 options and About-page update bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 
@@ -87,6 +101,6 @@ GitHub Pages publishes the root of the `main` branch. See the [deployment notes]
 
 ## Author
 
-[王政锠 · Luyout Wang](https://github.com/wsLuYao). Report problems through [Issues](https://github.com/wsLuYao/social-battery-game/issues), including your browser, device, and reproduction steps.
+王政锠 (Zhengchang Wang) and 何品洁 (Pinjie He), School of Psychology, Central China Normal University. Maintained by [wsLuYao](https://github.com/wsLuYao). Report problems through [Issues](https://github.com/wsLuYao/social-battery-game/issues), including your browser, device, and reproduction steps.
 
-Usage permissions for code and media assets are to be specified separately by the author.
+Original project content: all rights reserved; no open-source or other open-use license is granted. See [COPYRIGHT.md](COPYRIGHT.md) for use restrictions and the limited personal receipt-sharing permission. Third-party assets retain their own terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
