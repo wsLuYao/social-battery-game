@@ -1,12 +1,13 @@
 (function(root){
  'use strict';
  const M=root.GAME_RESOURCE_MANIFEST||{resources:{},groups:{}},doc=root.document;
- const records=new Map(),urls=new Map(),listeners=new Set(),gates=new Map();
+ const records=new Map(),urls=new Map(),decodedImages=new WeakMap(),listeners=new Set(),gates=new Map();
  const queue=[],active=new Set();let sequence=0,foreground=0,overlay=null,view=null,loadingPlay=null,currentOptional=new Set();
  const bundles=new Map(Object.entries(M.bundles||{}).map(([id,item])=>[
   id,{...item,status:'idle',members:[],received:0,attempt:0,error:null,blob:null}
  ]));
  const activeBundles=new Set();
+ const atlases=new Map(Object.entries(M.atlases||{}).map(([id,item])=>[id,{...item,image:null,promise:null}]));
  let lastBundleUpdate=0;
  const empty='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
  const abs=value=>{try{return new URL(value,doc?.baseURI||root.location?.href||'http://game.local/').href;}catch{return value;}};
@@ -16,7 +17,11 @@
   bundles.get(item.bundle)?.members.push(rec);
  }
  for(const [path,id] of Object.entries(M.aliases||{})){urls.set(path,id);urls.set(abs(path),id);}
- const record=id=>records.get(id)||records.get(urls.get(id))||records.get(urls.get(abs(id)));
+ const recordByUrl=url=>url&&(records.get(urls.get(url))||records.get(urls.get(abs(url))));
+ function record(value){
+  if(typeof value==='string')return records.get(value)||recordByUrl(value);
+  if(value&&typeof value==='object')return decodedImages.get(value)||recordByUrl(value.currentSrc)||recordByUrl(value.src);
+ }
  const groupIds=group=>[...new Set((Array.isArray(group)?group:[group]).flatMap(g=>M.groups[g]?.required||[]))];
  const optionalIds=group=>[...new Set((Array.isArray(group)?group:[group]).flatMap(g=>M.groups[g]?.optional||[]))];
  const ready=group=>(Array.isArray(group)?group:[group]).every(g=>!!M.groups[g])&&groupIds(group).every(id=>records.get(id)?.status==='ready');
@@ -62,7 +67,10 @@
  }
  function pump(){
   pumpBundles();
-  queue.sort((a,b)=>a.priority-b.priority||a.order-b.order);
+  // Finish a decoded sheet before opening more sheets, keeping mobile peak
+  // memory bounded while the full session is being prepared.
+  const sheetOpen=r=>r.atlas&&atlases.get(r.atlas)?.promise?0:1;
+  queue.sort((a,b)=>a.priority-b.priority||sheetOpen(a)-sheetOpen(b)||a.order-b.order);
   while(active.size<4){
    const i=queue.findIndex(r=>{
     if(r.status!=='queued'||r.parked)return false;
@@ -122,6 +130,15 @@
    pack.received=pack.bytes;pack.blob=blob;pack.status='ready';
   }catch(error){
    pack.error=error;pack.status='error';
+   // Settle every waiting consumer in the same turn. Otherwise an immediate
+   // retry can reset the pack while later consumers still report its old error.
+   for(const r of pack.members){
+    if(r.status!=='queued'||!isBundled(r))continue;
+    r.status='error';r.phase='error';
+    r.error=Object.assign(Error(error.message),{code:error.code||'network',status:error.status,resource:r.label||'场景素材'});
+    r.bad?.(r.error);
+   }
+   for(let i=queue.length-1;i>=0;i--)if(queue[i].status==='error')queue.splice(i,1);
   }finally{
    clearTimeout(timer);activeBundles.delete(pack);changed();pump();
   }
@@ -133,6 +150,33 @@
    if(pack?.error){
     const {message,code,status}=pack.error;
     throw Object.assign(Error(message),{code,status});
+   }
+   if(r.atlas){
+    const sheet=atlases.get(r.atlas),rect=r.rect;
+    if(!sheet||!pack?.blob||!Array.isArray(rect)||rect.length!==4||
+       rect.some(n=>!Number.isSafeInteger(n)||n<0)||rect[2]!==r.width||rect[3]!==r.height||
+       rect[0]+rect[2]>sheet.width||rect[1]+rect[3]>sheet.height||
+       sheet.offset<0||sheet.offset+sheet.bytes>pack.blob.size)
+     throw Object.assign(Error('图集裁切信息不完整'),{code:'decode'});
+    r.phase='decode';r.received=r.bytes;
+    if(!sheet.promise)sheet.promise=(async()=>{
+     const url=URL.createObjectURL(pack.blob.slice(sheet.offset,sheet.offset+sheet.bytes,sheet.mime));
+     const img=new root.Image();img.decoding='async';
+     try{
+      await new Promise((ok,bad)=>{img.onload=ok;img.onerror=()=>bad(Object.assign(Error('图集无法打开'),{code:'decode'}));img.src=url;});
+      if(img.decode)await img.decode();
+      if(img.naturalWidth!==sheet.width||img.naturalHeight!==sheet.height)throw Object.assign(Error('图集尺寸不完整'),{code:'decode'});
+      sheet.image=img;return img;
+     }finally{img.onload=img.onerror=null;URL.revokeObjectURL(url);}
+    })();
+    const img=await sheet.promise;
+    if(signal.aborted)throw Error('准备已中断');
+    const canvas=doc.createElement('canvas');canvas.width=r.width;canvas.height=r.height;
+    const context=canvas.getContext('2d');context.imageSmoothingEnabled=false;
+    // Restore the complete original rectangle before any existing game cropping.
+    context.drawImage(img,...rect,0,0,r.width,r.height);
+    try{return await new Promise((ok,bad)=>canvas.toBlob(blob=>blob?ok(blob):bad(Object.assign(Error('图集展开失败'),{code:'decode'})),'image/png'));}
+    finally{canvas.width=canvas.height=1;}
    }
    if(!pack?.blob||!Number.isSafeInteger(r.offset)||r.offset<0||
       !Number.isSafeInteger(r.bytes)||r.bytes<=0||r.offset+r.bytes>pack.blob.size){
@@ -146,11 +190,13 @@
  }
  async function pixels(r,blob){
   const signal=r.controller.signal;r.phase='decode';changed();
-  const url=URL.createObjectURL(blob),img=new root.Image();r.image=img;img.decoding='async';
+  const url=URL.createObjectURL(blob),img=new root.Image();img.decoding='async';
   try{await new Promise((ok,bad)=>{img.onload=()=>ok();img.onerror=()=>bad(Object.assign(Error('画面文件损坏或无法打开'),{code:'decode'}));img.src=url;});
    if(img.decode)await img.decode();if(signal.aborted)throw Error('准备已中断');if(!img.naturalWidth)throw Object.assign(Error('画面未能显示'),{code:'decode'});
   }catch(error){URL.revokeObjectURL(url);throw error;}
-  r.objectURL=url;urls.set(url,r.id);img.onload=img.onerror=null;
+  finally{img.onload=img.onerror=null;}
+  // Publish pixels and their original atlas dimensions together after decoding.
+  decodedImages.set(img,r);urls.set(url,r.id);r.objectURL=url;r.image=img;
  }
  async function code(r){
   if(r.readyFlag&&root[r.readyFlag])return;
@@ -202,7 +248,12 @@
   }catch(error){
    if(r.preempted){r.status='queued';r.received=0;r.order=++sequence;queue.push(r);}
    else{r.status='error';r.phase='error';r.error=Object.assign(error,{resource:r.label||'场景素材',code:r.timedOut?'timeout':error.code||'network'});r.element?.remove();r.bad?.(r.error);}
-  }finally{r.controller=null;r.timedOut=false;active.delete(r);changed();pump();}
+  }finally{r.controller=null;r.timedOut=false;active.delete(r);
+   if(r.atlas){
+    const sheet=atlases.get(r.atlas),pack=bundles.get(r.bundle);
+    if(sheet&&!pack?.members.some(a=>a.atlas===r.atlas&&(a.status==='loading'||a.status==='queued'&&!a.parked))){sheet.image=null;sheet.promise=null;}
+   }
+   changed();pump();}
  }
  function preempt(){for(const r of active)if(r.priority>0&&r.phase==='download'&&!source(r).startsWith('data:')){r.preempted=true;r.controller?.abort();}}
  function stats(group){
@@ -214,7 +265,9 @@
    if(r.status==='loading')current??=r;
    const pack=isBundled(r)&&bundles.get(r.bundle);
    if(pack&&(pack.status==='loading'||pack.status==='ready')){
-    done+=Math.max(0,Math.min(r.bytes,pack.received-r.offset));
+    const source=r.atlas?atlases.get(r.atlas):r;
+    const fraction=Math.max(0,Math.min(1,(pack.received-source.offset)/source.bytes));
+    done+=r.bytes*fraction;
     if(pack.status==='loading'&&r.status==='queued')current??=r;
    }else if(!pack&&(r.phase==='download'||r.phase==='decode')){
     done+=Math.min(r.bytes||1,r.received||0);
@@ -234,6 +287,7 @@
    if(pack&&(pack.status==='error'||pack.status==='ready')){
     pack.status='idle';pack.received=0;pack.error=null;pack.blob=null;
    }
+   if(r.atlas){const sheet=atlases.get(r.atlas);if(sheet){sheet.image=null;sheet.promise=null;}}
    r.status='idle';r.phase='';r.received=0;r.error=null;r.promise=null;r.priority=20;
   }
  }

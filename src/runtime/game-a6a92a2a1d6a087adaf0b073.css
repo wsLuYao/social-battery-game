@@ -14397,7 +14397,7 @@ h1 em {
 
 #app.mobile-landscape #vn-root {
     --vn-dialog-w: min(760px, calc(100% - var(--ui-safe-left) - var(--ui-safe-right) - 56px));
-    --vn-dialog-height: clamp(136px, 44%, 172px)
+    --vn-dialog-height: clamp(132px, 32%, 140px)
 }
 
 #app.mobile-landscape .vn-dialog {
@@ -14581,7 +14581,7 @@ h1 em {
     z-index: auto;
     display: grid;
     grid-template-columns: repeat(var(--option-cols, 1), minmax(0, 1fr));
-    grid-auto-rows: minmax(44px, max-content);
+    grid-auto-rows: minmax(var(--dialog-option-height,36px), max-content);
     align-content: flex-start;
     gap: 6px;
     overflow-y: auto;
@@ -21892,21 +21892,87 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 #coach.coach-practice .coach-spot { border-radius: 3px; box-shadow: 0 0 0 9999px #17152570, 0 0 0 3px #2d293a70; }
 #coach.coach-practice .coach-bubble { padding: 10px 13px; }
 .vn-text.is-narration { text-align: center; margin-inline: auto; }
-/* Older paged dialogue uses the same steady footprint as the main story. */
-#app #modal.vn:not(.vn-full) .dialog:has(.vn-page) {
-  height: clamp(126px, calc(var(--game-h, 100dvh) * .39), 164px);
-  max-height: calc(var(--game-h, 100dvh) - 36px);
-  overflow: hidden;
-}
-#app .dialog:has(.vn-page) #modalContent,
-#app .dialog:has(.vn-page) .vn-layout,
-#app .dialog:has(.vn-page) .vn-content { height: 100%; }
-#app .dialog:has(.vn-page) .vn-content { display: flex; flex-direction: column; }
-#app .dialog:has(.vn-page) :is(.vn-name,.vn-controls) { flex-shrink: 0; }
-#app .dialog:has(.vn-page) .vn-text { flex: 1 1 0; min-height: 0; max-height: none; }
 #app #toast.pixel-feedback { max-width: min(470px, calc(var(--game-w, 100vw) - 32px)); line-height: 1.5; }
 @media (max-height: 450px) {
   #coach .coach-bubble { font-size: 13px; line-height: 1.55; }
   #coach .coach-bubble h3 { font-size: 15px; margin-bottom: 4px; }
   #coach .coach-actions { margin-top: 7px; }
 }
+
+/* One compact frame for narration, conversation, and legacy dialogue. */
+#app #vn-root, #app.mobile-landscape #vn-root { --vn-dialog-height: clamp(132px, 32%, 140px); }
+#app #vn-dialog,
+#app #modal.vn:not(.vn-full) .dialog:has(.vn-content) {
+  box-sizing: border-box;
+  padding: 4px 14px;
+}
+#app #modal.vn:not(.vn-full) .dialog:has(.vn-content) {
+  height: clamp(132px, calc(var(--game-h, 100dvh) * .32), 140px);
+  max-height: calc(var(--game-h, 100dvh) - 36px);
+  overflow: hidden;
+}
+#app .dialog:has(.vn-content) #modalContent,
+#app .dialog:has(.vn-content) .vn-layout,
+#app .dialog .vn-content { height: 100%; min-height: 0; }
+#app .dialog .vn-content { display: flex; flex-direction: column; }
+#app :is(#vn-dialog,.dialog) :is(.vn-nameplate,.vn-name) {
+  flex-shrink: 0; font-size: 12px; line-height: 1.3; padding: 1px 9px; margin: 0 0 2px;
+}
+#app :is(#vn-dialog,.dialog) :is(.vn-line,.vn-text) {
+  font-size: var(--dialog-copy, 15px) !important; line-height: 1.4 !important;
+  flex: 1 1 0; min-height: 0; max-height: none;
+  margin: 2px 0 4px !important; width: 100%; overflow-wrap: anywhere; overflow-x: hidden;
+}
+#app #vn-dialog .vn-line > span { display: block; }
+#app.mobile-landscape #vn-dialog.has-options .vn-line,
+#app #modal .vn-content:has(.vn-choices) .vn-text { flex: 0 1 auto; min-height: 1.4em; }
+#app :is(#vn-dialog,.dialog) :is(.vn-dialog-foot,.vn-controls) {
+  flex-shrink: 0; min-height: 30px; gap: 6px;
+}
+#app .vn-controls:not(:has(button)):not(:has(.vn-page)) { display: none; }
+#app :is(#vn-dialog,.dialog) :is(.vn-next,.vn-controls button) {
+  min-height: 30px; padding: 3px 12px; font-size: 12px; line-height: 1.3;
+}
+#app #vn-dialog.has-options .vn-dialog-foot { display: none; }
+#app.mobile-landscape #vn-dialog > .vn-options,
+#app .vn-content .vn-choices {
+  min-height: 0; flex: 1 1 auto; gap: 4px; margin: 2px 0 0;
+  padding: 0 2px 3px; grid-auto-rows: minmax(var(--dialog-option-height,36px), max-content);
+  overflow-y: auto; overflow-x: hidden;
+}
+#app.mobile-landscape #vn-dialog > .vn-options .vn-option,
+#app .vn-content .vn-choices .choice {
+  min-height: var(--dialog-option-height,36px); min-width: 0;
+  padding: var(--dialog-option-pad,6px) 9px;
+  font-size: var(--dialog-option,14px); line-height: 1.3;
+  white-space: normal; overflow-wrap: anywhere;
+}
+#app.mobile-landscape #vn-dialog > .vn-options :is(small,.vn-option-hint,.vn-option-reason) {
+  font-size: max(10px, calc(var(--dialog-option,14px) - 2px)); line-height: 1.2;
+}
+#app.mobile-landscape #vn-dialog > .vn-options .vn-option:has(.vn-option-reason) {
+  flex-direction: column; align-items: flex-start; gap: 1px;
+}
+#app.mobile-landscape #vn-dialog > .vn-options .vn-option-reason { max-width: 100%; }
+#app .vn-content .vn-resource { flex-shrink: 0; padding-top: 3px; gap: 8px; font-size: 11px; }
+#app .vn-content .feedback-meter { flex-shrink: 0; margin: 3px 0; height: 5px; }
+#app #modal .vn-content .vn-choices { grid-template-columns: repeat(var(--dialog-columns,3),minmax(0,1fr)); align-content: start; }
+#app #modal .vn-content .choice { gap: 2px; }
+#app #modal .vn-content .choice strong { font-size: inherit; }
+#app #modal .vn-content .choice .cost { font-size: max(10px,calc(var(--dialog-option,14px) - 2px)); }
+#app #modal .vn-content .choice .cost b { font-size: max(12px,var(--dialog-option,14px)); }
+/* Draw disclosure indicators; iOS must not substitute a colored emoji. */
+#app summary { display: flex; align-items: center; gap: .5em; list-style: none; }
+#app summary::-webkit-details-marker { display: none; }
+#app summary::marker { content: ''; }
+#app summary::before {
+  content: ''; display: inline-block; width: 0; height: 0; flex: 0 0 auto;
+  border-top: .3em solid transparent; border-bottom: .3em solid transparent;
+  border-left: .4em solid currentColor; transform: none;
+}
+#app details[open] > summary::before { transform: rotate(90deg); }
+
+#app #report summary::after { content: none; }
+
+/* Measurements must not catch an in-flight font/padding transition. */
+#app :is(#vn-dialog,.vn-content), #app :is(#vn-dialog,.vn-content) * { transition: none !important; }

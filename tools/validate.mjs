@@ -34,10 +34,32 @@ for (const [id, bundle] of Object.entries(manifest.bundles || {})) {
   if (!bundle.url.endsWith(`-${hashPrefix(data)}.bin`)) errors.push(`Wrong bundle hash: ${bundle.url}`);
   packs.set(id, data);
 }
+const atlases = manifest.atlases || {};
+for (const [id, atlas] of Object.entries(atlases)) {
+  const pack = packs.get(atlas.bundle);
+  const { offset, bytes, width, height } = atlas;
+  if (!pack || !Number.isSafeInteger(offset) || offset < 0 ||
+      !Number.isSafeInteger(bytes) || bytes <= 0 || offset + bytes > pack.length ||
+      !Number.isSafeInteger(width) || width <= 0 || !Number.isSafeInteger(height) || height <= 0) {
+    errors.push(`Invalid atlas slice or dimensions: ${id}`);
+  } else if (id !== `sheet-${hashPrefix(pack.subarray(offset, offset + bytes))}`) {
+    errors.push(`Wrong atlas hash: ${id}`);
+  }
+}
 for (const [id, resource] of Object.entries(resources)) {
   const absolute = path.resolve(root, resource.url);
   if (!absolute.startsWith(root + path.sep)) errors.push(`Resource outside repository: ${id}`);
-  else if (resource.bundle !== undefined) {
+  else if (resource.atlas !== undefined) {
+    const atlas = atlases[resource.atlas];
+    const rect = resource.rect;
+    if (!atlas || resource.type !== 'image' || resource.bundle !== atlas.bundle ||
+        !Array.isArray(rect) || rect.length !== 4 ||
+        rect.some(n => !Number.isSafeInteger(n) || n < 0) ||
+        rect[2] <= 0 || rect[3] <= 0 || rect[2] !== resource.width || rect[3] !== resource.height ||
+        rect[0] + rect[2] > atlas.width || rect[1] + rect[3] > atlas.height) {
+      errors.push(`Invalid atlas rectangle: ${id}`);
+    }
+  } else if (resource.bundle !== undefined) {
     const pack = packs.get(resource.bundle);
     const { offset, bytes } = resource;
     if (!pack || !Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(bytes) || bytes <= 0 || offset + bytes > pack.length) {
@@ -124,4 +146,4 @@ if (!exists('.nojekyll')) errors.push('Missing GitHub Pages static marker');
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
-} else console.log(`Passed ${release.version}: ${Object.keys(resources).length} resources, ${packs.size} bundles, ${Object.keys(manifest.groups).length} groups, release versions, no obsolete assets, entry references, JavaScript syntax, README screenshots, and receipt QR destination.`);
+} else console.log(`Passed ${release.version}: ${Object.keys(resources).length} resources, ${packs.size} bundles, ${Object.keys(atlases).length} atlases, ${Object.keys(manifest.groups).length} groups, release versions, no obsolete assets, entry references, JavaScript syntax, README screenshots, and receipt QR destination.`);
