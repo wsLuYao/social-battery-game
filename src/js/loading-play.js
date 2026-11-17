@@ -7,7 +7,7 @@
   function create(host) {
     if (!host) return null;
     host.innerHTML = '<div class="load-play-heading"><h3>接住小星光</h3><output class="load-play-score" aria-label="小游戏收集数量">0 颗</output></div>' +
-      '<p class="load-play-hint" id="loading-play-hint">左右移动小盒子，接住落下的星星</p>' +
+      '<p class="load-play-hint" id="loading-play-hint">左右移动接星星，越落越快，试试你的反应！</p>' +
       '<canvas class="load-play-board" width="600" height="360" tabindex="0" data-gesture-surface aria-label="接星光小游戏，用左右方向键移动小盒子" aria-describedby="loading-play-hint"></canvas>' +
       '<div class="load-play-controls"><button type="button" data-play-left aria-label="向左移动小盒子"><span aria-hidden="true">←</span></button>' +
       '<p class="load-play-feedback" aria-live="polite">漏接也没关系</p><button type="button" data-play-right aria-label="向右移动小盒子"><span aria-hidden="true">→</span></button></div>';
@@ -69,17 +69,17 @@
     function tick(time) {
       frame = 0;
       if (!enabled || disposed || doc.hidden) return;
-      if (time - drawnAt < 32) { frame = root.requestAnimationFrame(tick); return; }
+      if (time - drawnAt < 15) { frame = root.requestAnimationFrame(tick); return; }
       const dt = previous ? Math.min(.07, Math.max(0, (time - previous) / 1000)) : 0;
       previous = drawnAt = time; played += dt;
-      // Six gentle seconds, then a gradual ramp. At 50 seconds the pace reaches
-      // its ceiling and never accelerates again, even on very slow connections.
-      const difficulty = clamp((played - 6) / 44, 0, 1);
-      const speed = 1 + difficulty * (reduced?.matches ? .6 : 1.1);
-      boxX += (position(lane) - boxX) * Math.min(1, dt * 24); spawnIn -= dt;
-      if (spawnIn <= 0 && stars.length < 4) { stars.push({ lane: randLane(), y: -15, gold: score > 0 && score % 5 === 4 }); spawnIn = (reduced?.matches ? 1.7 : 1.25) - difficulty * .3; }
+      // A reaction game from the start: 1.65s to catch, then 0.72s at 20s.
+      // Use board-relative travel time so phones and desktops play at the same pace.
+      const difficulty = clamp(played / 20, 0, 1);
+      const fallSeconds = 1.65 - difficulty * .93;
+      boxX += (position(lane) - boxX) * Math.min(1, dt * 40); spawnIn -= dt;
+      if (spawnIn <= 0 && stars.length < 4) { stars.push({ lane: randLane(), y: -15, gold: score > 0 && score % 5 === 4 }); spawnIn = .82 - difficulty * .42; }
       for (let i = stars.length - 1; i >= 0; i--) {
-        const s = stars[i]; s.y += dt * Math.max(22, (height - 15) / (reduced?.matches ? 5.4 : 4.3)) * speed;
+        const s = stars[i]; s.y += dt * (height - 22) / fallSeconds;
         if (s.y >= height - 37) { if (Math.abs(position(s.lane) - boxX) <= 31) catchStar(s); stars.splice(i, 1); }
       }
       for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.dx * dt; p.y += p.dy * dt; p.life -= dt * 2; if (p.life <= 0) particles.splice(i, 1); }

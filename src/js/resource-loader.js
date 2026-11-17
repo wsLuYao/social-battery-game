@@ -139,9 +139,19 @@
   doc.getElementById('app').appendChild(overlay);loadingPlay=root.GameLoadingPlay?.create(overlay.querySelector('.load-play'));return overlay;
  }
  function loadingEvent(active){doc.getElementById('app').classList.toggle('is-resource-loading',active);root.dispatchEvent?.(new CustomEvent('game:loading',{detail:{active}}));}
+ function loadingTitle(v,s){
+  if(v.error||s.failed.length)return '网络打了个小盹，重试就能接着准备';
+  if(s.complete)return '准备好啦，你的这一晚即将开场！';
+  const elapsed=Date.now()-v.startedAt;
+  if(s.percent>=90)return '就差一点点，今晚马上开场！';
+  if(s.percent>=80)return '再接几颗星，好心情就位中！';
+  if(elapsed>=10000)return '先接几颗星，等今晚慢慢亮起来';
+  if(elapsed>=5000)return '初次见面，下载大约需要 1 分钟';
+  return v.title;
+ }
  function paint(v){
   const s=stats(v.groups),el=makeOverlay(),percent=el.querySelector('[data-load-percent]');
-  el.querySelector('[data-load-title]').textContent=v.title;
+  el.querySelector('[data-load-title]').textContent=loadingTitle(v,s);
   percent.textContent=(v.progressLabel||'场景准备')+' '+s.percent+'%';percent.setAttribute('aria-valuenow',s.percent);
   el.querySelectorAll('.scene-load-cell').forEach((cell,i)=>{const fill=Math.max(0,Math.min(1,(s.percent-i*10)/10));cell.firstElementChild.style.width=(fill*100)+'%';cell.classList.toggle('is-current',!s.complete&&s.percent>=i*10&&s.percent<(i+1)*10);});
   if(v.previous!==s.done){v.previous=s.done;v.lastProgress=Date.now();}
@@ -153,14 +163,14 @@
   el.querySelector('[data-load-status]').textContent=text;
   let duration=el.querySelector('[data-load-duration]');
   if(!duration){duration=doc.createElement('p');duration.className='scene-load-duration';duration.setAttribute('data-load-duration','');el.querySelector('.scene-load-actions').before(duration);}
-  duration.textContent='加载可能需要约 1 分钟，请耐心等待。';
+  duration.textContent='准备好后会自动进入；接星星不影响加载进度。';
   el.querySelector('.scene-load-actions').hidden=!failed;
   return s;
  }
  async function prepare(groups,options={}){
   if(ready(groups)&&!options.forceDisplay)return true;
   if(view){const pending=view,same=groupIds(groups).every(id=>groupIds(pending.groups).includes(id));const ok=await pending.promise;if(!ok)return false;return same&&ready(groups)?true:prepare(groups,options);}
-  const owner={groups,title:options.title||M.groups[Array.isArray(groups)?groups.at(-1):groups]?.title||'正在准备下一段旅程',progressLabel:options.progressLabel,lastProgress:Date.now(),previous:-1,shown:0};
+  const owner={groups,title:options.title||M.groups[Array.isArray(groups)?groups.at(-1):groups]?.title||'正在准备下一段旅程',progressLabel:options.progressLabel,startedAt:Date.now(),lastProgress:Date.now(),previous:-1,shown:0};
   view=owner;owner.promise=new Promise(resolve=>owner.finish=resolve);loadingEvent(true);
   const revealNow=()=>{if(view===owner){makeOverlay().hidden=false;loadingPlay?.start();owner.shown=Date.now();paint(owner);}};
   let reveal=options.immediate?null:setTimeout(revealNow,140);

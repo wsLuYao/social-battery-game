@@ -1,6 +1,6 @@
 {
-  "version": "v21",
+  "version": "v22",
   "release_date": "2026-11-17",
-  "build": "20261117-v21",
-  "description": "第二批细节修复、两种小票保存格式与无损音频加载"
+  "build": "20261117-v22",
+  "description": "轻量部署包、加载与分享优化"
 }
