@@ -12,7 +12,7 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
-**Current release: [v26 · 2026-11-18](version.json)**
+**Current release: [v27 · 2026-11-18](version.json)**
 
 ## What you can do
 
@@ -66,19 +66,19 @@ The recharge guide includes a pixel-printer sequence with soft printing audio. I
 
 Sharing adapts to the device: system image sharing, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
-Both examples below were produced by the **v26 game receipt renderer** from the same sample records, using the advance-planning cat character.
+Both examples below were produced by the **v27 game receipt renderer** from the same sample records, using the advance-planning cat character.
 
 **Square receipt · 1200×1200**
 
 A slim printer sits above the wide ticket. This is the default format for native image sharing and long-press saving.
 
-![v26 square receipt example](docs/screenshots/receipt-square-v26.png)
+![v27 square receipt example](docs/screenshots/receipt-square-v27.png)
 
 **Landscape receipt · 2000×1040**
 
 The full printer sits beside the horizontal ticket. Choose this format in the save panel, preview the image, then confirm the download.
 
-![v26 landscape receipt example](docs/screenshots/receipt-landscape-v26.png)
+![v27 landscape receipt example](docs/screenshots/receipt-landscape-v27.png)
 
 ## Run locally
 
@@ -95,7 +95,7 @@ Open [http://localhost:8000](http://localhost:8000). Serve the files over HTTP s
 ## How it works
 
 - HTML, CSS, and vanilla JavaScript combine Canvas scenes with DOM interfaces.
-- Images, audio, and fonts are stored in 10 scene packs. Of the images, 86 share four atlases and are drawn using their rectangle and scale metadata. Other images retain standalone compressed data.
+- Images, audio, and fonts are stored in 14 scene packs. Of the images, 85 share eight atlases and are drawn using their rectangle metadata at their original dimensions. Other images retain standalone compressed data.
 - Progress, settings, and gallery unlocks use browser LocalStorage. There is no account system or cloud synchronization.
 - Sharing and image export are initiated by the player. The receipt's QR code links to the deployed game.
 
@@ -114,7 +114,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-The current release is **v26 · November 18, 2026**, based on the low-quality GitHub Pages build with staged loading. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v27 · November 18, 2026**, based on the medium-quality GitHub Pages build with staged loading and WeChat adaptations. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 
