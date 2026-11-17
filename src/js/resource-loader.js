@@ -24,8 +24,13 @@
   if(!r)return Promise.reject(Error('资源清单不完整'));
   if(r.status==='ready')return Promise.resolve(r);
   if(r.status==='error')return Promise.reject(r.error);
-  if(!r.promise){r.promise=new Promise((ok,bad)=>{r.ok=ok;r.bad=bad;});r.promise.catch(()=>{});r.status='queued';r.order=++sequence;queue.push(r);}
-  r.priority=Math.min(r.priority,priority);r.parked=false;pump();return r.promise;
+  const firstRequest=!r.promise;
+  if(firstRequest){r.promise=new Promise((ok,bad)=>{r.ok=ok;r.bad=bad;});r.promise.catch(()=>{});r.status='queued';}
+  r.priority=Math.min(r.priority,priority);r.parked=false;
+  // Start dependencies before their consumers can fill all four active slots.
+  for(const id of r.deps||[])task(records.get(id),r.priority).catch(()=>{});
+  if(firstRequest){r.order=++sequence;queue.push(r);}
+  pump();return r.promise;
  }
  function pump(){
   queue.sort((a,b)=>a.priority-b.priority||a.order-b.order);
@@ -75,13 +80,26 @@
   if(r.controller.signal.aborted)throw Error('准备已中断');
   doc.fonts.add(face);r.fontFace=face;
  }
+ async function audio(r,blob){
+  const signal=r.controller.signal;
+  if(r.pcm){
+   r.phase='decode';changed();
+   const input=new Uint8Array(await blob.arrayBuffer());
+   const wave=await root.GameLosslessAudio.restore(input,r.pcm,signal);
+   blob=new Blob([wave],{type:'audio/wav'});
+  }else{
+   blob=new Blob([blob],{type:r.mime});
+  }
+  if(signal.aborted)throw Error('准备已中断');
+  r.objectURL=URL.createObjectURL(blob);urls.set(r.objectURL,r.id);
+ }
  async function run(r){
   r.attempt=(r.attempt||0)+1;r.controller=new AbortController();r.preempted=false;changed();
   try{
    for(const dep of r.deps||[])await task(records.get(dep),r.priority);
    await timeout((async()=>{
     if(r.type==='script'||r.type==='style')await code(r);
-    else{const blob=await binary(r);if(r.type==='image')await pixels(r,blob);else if(r.type==='font')await font(r,blob);else{if(r.controller.signal.aborted)throw Error('准备已中断');r.objectURL=URL.createObjectURL(blob);urls.set(r.objectURL,r.id);}}
+    else{const blob=await binary(r);if(r.type==='image')await pixels(r,blob);else if(r.type==='font')await font(r,blob);else await audio(r,blob);}
    })(),M.timeoutMs||32000,()=>{r.timedOut=true;r.controller.abort();});
    r.status='ready';r.phase='ready';r.error=null;if(r.cssVar&&r.objectURL)doc.documentElement.style.setProperty(r.cssVar,'url("'+r.objectURL+'")');r.ok?.(r);
   }catch(error){

@@ -390,6 +390,7 @@ button:active {
 }
 
 .pip {
+    flex-shrink: 0;
     width: 17px;
     height: 4px;
     background: #c7ac81
@@ -8517,17 +8518,19 @@ h1 em {
 }
 
 .npc-bubble {
+    --bubble-outline: #7a553d;
     position: absolute;
     transform: translate(-50%, -100%);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
-    min-width: 150px;
-    max-width: 250px;
+    width: max-content;
+    min-width: min(150px, var(--bubble-max-width, calc(100% - 20px)));
+    max-width: min(250px, var(--bubble-max-width, calc(100% - 20px)));
     padding: 9px 13px 11px;
     background: #fff4d6f5;
-    border: 3px solid #7a553d;
+    border: 3px solid var(--bubble-outline);
     border-radius: 10px;
     box-shadow: inset 0 0 0 2px #ffecc0, 3px 4px #2b253588;
     color: #4a3630;
@@ -8540,14 +8543,32 @@ h1 em {
 .npc-bubble:after {
     content: '';
     position: absolute;
-    left: calc(50% - 7px);
+    left: var(--bubble-tail-x, 50%);
     bottom: -11px;
     width: 13px;
     height: 13px;
     background: #fff4d6;
-    border-right: 3px solid #7a553d;
-    border-bottom: 3px solid #7a553d;
-    transform: rotate(45deg)
+    border-right: 3px solid var(--bubble-outline);
+    border-bottom: 3px solid var(--bubble-outline);
+    transform: translateX(-50%) rotate(45deg);
+    pointer-events: none
+}
+
+.npc-bubble[data-tail="top"]:after {
+    top: -11px;
+    bottom: auto;
+    transform: translateX(-50%) rotate(225deg)
+}
+
+#bubbles .npc-bubble.bubble-short {
+    justify-content: center;
+    min-height: 44px;
+    gap: 3px;
+    padding-block: 4px
+}
+
+.npc-bubble.bubble-short .bubble-text {
+    display: none
 }
 
 .npc-bubble:hover {
@@ -8577,7 +8598,7 @@ h1 em {
 }
 
 .npc-bubble[data-kind="exit"] {
-    border-color: #657c51
+    --bubble-outline: #657c51
 }
 
 @keyframes bubblePop {
@@ -8764,6 +8785,18 @@ h1 em {
     max-height: 8.5em;
     overflow-y: auto;
     scrollbar-width: thin
+}
+
+/* 旁白沿中线逐字展开，不使用人物姓名牌；人物对话保留原排版。 */
+#vn-root[data-char="narrator"] .vn-nameplate {
+    display: none
+}
+
+#vn-root[data-char="narrator"] .vn-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center
 }
 
 .vn-dialog-foot {
@@ -13503,8 +13536,8 @@ h1 em {
 }
 
 #app.mobile-landscape .npc-bubble {
-    min-width: 160px;
-    max-width: 260px;
+    min-width: min(160px, var(--bubble-max-width, calc(100% - 20px)));
+    max-width: min(260px, var(--bubble-max-width, calc(100% - 20px)));
     padding: 8px 12px 10px
 }
 
@@ -13519,11 +13552,6 @@ h1 em {
 
 #app.mobile-landscape .npc-bubble .bubble-cta {
     font-size: 12px
-}
-
-/* 被边界推开后不再把尾巴指向已经偏离的锚点。 */
-#app.mobile-landscape .npc-bubble[data-shifted="1"]:after {
-    display: none
 }
 
 #app.mobile-landscape #stationTags .station-tag {
@@ -15549,15 +15577,17 @@ h1 em {
 }
 
 #app.mobile-landscape .task-pips {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 6px);
+    flex-shrink: 0;
     gap: 2px;
     width: 46px;
     height: 3px
 }
 
 #app.mobile-landscape .task-pip {
-    flex: 1;
     min-width: 0;
+    height: 100%;
     background: #ccb489
 }
 
@@ -16046,15 +16076,17 @@ h1 em {
 }
 
 #app:not(.mobile-landscape) .task-pips {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 7px);
+    flex-shrink: 0;
     gap: 3px;
-    width: 58px;
+    width: 57px;
     height: 4px
 }
 
 #app:not(.mobile-landscape) .task-pip {
-    flex: 1;
     min-width: 0;
+    height: 100%;
     background: #ccb489
 }
 
@@ -16369,8 +16401,9 @@ h1 em {
     }
 
     #app:not(.mobile-landscape) .task-pips {
+        grid-template-columns: repeat(6, 6px);
         gap: 2px;
-        width: 48px;
+        width: 46px;
         height: 3px
     }
 
@@ -21084,17 +21117,35 @@ h1 em {
     margin: 0; padding: 3px; border: 0; background: #b3a080;
     border-radius: 0; clip-path: var(--phone-pixel-round);
 }
-.phone-clean-workspace .phone-avatar-disc > img {
+.phone-clean-workspace .phone-avatar-disc > img,
+.phone-clean-workspace .phone-avatar-disc > .phone-avatar-crop {
     display: block; box-sizing: border-box;
     width: 100%; height: 100%; min-width: 0; min-height: 0;
     margin: 0; padding: 2px; border: 0;
     background: #fff1d2; object-fit: contain;
     image-rendering: pixelated; clip-path: var(--phone-pixel-round);
 }
+.phone-clean-workspace .phone-avatar-crop { overflow: hidden; pointer-events: none; }
+.phone-clean-workspace [data-phone-action="open-chat"] .phone-avatar-disc {
+    width: 38px; height: 38px; min-width: 38px; min-height: 38px; flex-basis: 38px; padding: 2px;
+}
+.phone-clean-workspace .phone-chat-row .phone-avatar-disc {
+    width: 24px; height: 24px; min-width: 24px; min-height: 24px; flex-basis: 24px; padding: 1px;
+}
+.phone-clean-workspace .phone-chat-row .phone-avatar-disc > img,
+.phone-clean-workspace .phone-chat-row .phone-avatar-disc > .phone-avatar-crop {
+    padding: 1px;
+}
 .phone-clean-workspace .phone-call-head .phone-avatar-disc {
     width: 28px; height: 28px; min-width: 28px; min-height: 28px; flex-basis: 28px; padding: 1px;
 }
 .phone-clean-workspace .phone-call-head .phone-avatar-disc > img { padding: 1px; }
+.phone-clean-workspace .phone-call-connected {
+    display: flex; align-items: center; gap: 3px; white-space: nowrap;
+}
+.phone-clean-workspace .phone-call-connected > .phone-pixel-glyph {
+    width: 10px; height: 10px; color: #a9c59a;
+}
 #app #modal.phone-open .phone-clean-workspace .phone-dial-screen {
     display: grid; grid-template-columns: minmax(0,1fr);
     grid-template-rows: minmax(0,1fr) 44px;
@@ -21129,9 +21180,13 @@ h1 em {
     gap: 14px; text-align: left; background: #f0e3c9; color: #493c31;
 }
 #app #modal.phone-open .phone-clean-workspace .phone-call-result > h2 {
-    display: block; width: 100%; margin: 0; padding: 0;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; margin: 0; padding: 0;
     color: #493c31; text-align: center; font-size: 18px; line-height: 26px;
     letter-spacing: 0; white-space: normal; word-break: normal; overflow-wrap: normal;
+}
+.phone-clean-workspace .phone-call-result h2 > .phone-pixel-glyph {
+    width: 18px; height: 18px; color: #566b4e;
 }
 .phone-clean-workspace .phone-call-result-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 #app #modal.phone-open .phone-clean-workspace .phone-call-result-copy > p {
@@ -21657,6 +21712,36 @@ h1 em {
 @keyframes image-share-appear{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){#report .image-share-guide{animation:none}}
 
+/* Saving is a separate, cancellable preview; sharing always keeps the square image. */
+#report .r16-save-picker{position:absolute;inset:0;z-index:80;display:grid;place-items:center;padding:clamp(10px,2cqw,26px);background:rgba(20,31,26,.72);overflow:hidden}
+#report .r16-save-picker[hidden]{display:none}
+#report .r16-save-dialog{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:12px;width:min(100%,1080px);height:min(100%,940px);min-width:0;min-height:0;padding:20px;box-sizing:border-box;border:3px solid var(--receipt-dark);box-shadow:5px 5px 0 #17291b66;background:#fff9e8;color:var(--receipt-dark);overflow:hidden}
+#report .r16-save-dialog header{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:0}
+#report .r16-save-dialog h2{margin:0;font:800 clamp(18px,2.5cqw,28px)/1.35 var(--rp-font);color:var(--receipt-dark)}
+#report .r16-save-dialog button{min-height:44px;margin:0;padding:9px 16px;border:2px solid var(--receipt-dark);background:#fffdf3;box-shadow:2px 2px 0 var(--receipt-accent);color:var(--receipt-dark);font:700 16px/1.35 var(--rp-font);cursor:pointer}
+#report .r16-save-dialog header button{flex:none;display:grid;place-items:center;width:44px;padding:0;font-size:27px;line-height:1}
+#report .r16-save-formats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#report .r16-save-formats button[aria-pressed="true"]{background:var(--receipt-light);box-shadow:inset 0 -4px 0 var(--receipt-accent);border-width:3px}
+#report .r16-save-preview{display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;padding:12px;border:1px dashed var(--receipt-accent);background:#ece6d5;overflow:hidden}
+#report .r16-save-preview img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;image-rendering:auto}
+#report .r16-save-preview p{margin:0;text-align:center;font-size:15px;line-height:1.6}
+#report .r16-save-dialog footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#report .r16-save-dialog [data-save-confirm]{background:var(--receipt-dark);color:#fff9e8}
+#report .r16-save-dialog button:disabled{opacity:.55;cursor:wait}
+#report .r16-save-dialog button:focus-visible{outline:3px solid var(--receipt-accent);outline-offset:3px}
+#report .r16-save-dialog button:active:not(:disabled){transform:translate(1px,1px);box-shadow:none}
+#report .r16-save-status{margin:0;min-height:1.5em;font-size:13px;line-height:1.5;text-align:center;color:var(--receipt-dark)}
+#report[data-rp-fit="viewport"] .r16-save-dialog{grid-template-columns:minmax(180px,1fr) minmax(0,2fr);grid-template-rows:auto minmax(0,1fr) auto auto;gap:10px;padding:12px;max-height:100%}
+#report[data-rp-fit="viewport"] .r16-save-dialog header{grid-column:1/-1}
+#report[data-rp-fit="viewport"] .r16-save-formats{grid-column:1;grid-row:2;grid-template-columns:1fr;align-content:start}
+#report[data-rp-fit="viewport"] .r16-save-preview{grid-column:2;grid-row:2/4;padding:6px}
+#report[data-rp-fit="viewport"] .r16-save-dialog footer{grid-column:1;grid-row:3;grid-template-columns:1fr;gap:8px}
+#report[data-rp-fit="viewport"] .r16-save-status{grid-column:1/-1;grid-row:4;font-size:12px}
+#report[data-rp-fit="viewport"] .r16-save-dialog button{font-size:14px;padding:8px}
+#report[data-rp-mode="portrait"] .r16-save-dialog{grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1fr) auto auto}
+#report[data-rp-mode="portrait"] .r16-save-dialog header,#report[data-rp-mode="portrait"] .r16-save-dialog footer,#report[data-rp-mode="portrait"] .r16-save-formats,#report[data-rp-mode="portrait"] .r16-save-preview,#report[data-rp-mode="portrait"] .r16-save-status{grid-column:1;grid-row:auto}
+#report[data-rp-mode="portrait"] .r16-save-formats,#report[data-rp-mode="portrait"] .r16-save-dialog footer{grid-template-columns:repeat(2,minmax(0,1fr))}
+
 /* interaction-guard.css */
 /* Browser gestures belong to the stage; reading panes own vertical scrolling. */
 html,body{position:fixed!important;inset:0;width:100%;height:100%;overflow:hidden!important;overscroll-behavior:none}
@@ -21766,3 +21851,19 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 }
 #app .scene-load-card.is-starting{grid-template-columns:1fr;width:min(460px,calc(100% - 32px))}
 @media(prefers-reduced-motion:reduce){.scene-load-row{animation:none!important}#app .load-play-controls button:active{transform:none}}
+
+/* experience.css */
+/* 实际移动阶段允许点击场景和气泡，后续说明阶段再锁定操作。 */
+#coach.coach-practice { pointer-events: none; }
+#coach.coach-practice .coach-bubble { pointer-events: auto; }
+#coach .coach-bubble { max-width: min(300px, calc(var(--game-w, 100vw) - 24px)); }
+#coach.coach-practice .coach-spot { border-radius: 3px; box-shadow: 0 0 0 9999px #17152570, 0 0 0 3px #2d293a70; }
+#coach.coach-practice .coach-bubble { padding: 10px 13px; }
+.vn-text.is-narration { text-align: center; margin-inline: auto; }
+#app :is(button,a,summary,[tabindex]):focus-visible { outline: 3px solid #f2c66e; outline-offset: 3px; }
+#app #toast.pixel-feedback { max-width: min(470px, calc(var(--game-w, 100vw) - 32px)); line-height: 1.5; }
+@media (max-height: 450px) {
+  #coach .coach-bubble { font-size: 13px; line-height: 1.55; }
+  #coach .coach-bubble h3 { font-size: 15px; margin-bottom: 4px; }
+  #coach .coach-actions { margin-top: 7px; }
+}

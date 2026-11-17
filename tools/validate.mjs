@@ -67,7 +67,7 @@ for (const filename of files.filter(f => /\.(?:js|mjs)$/.test(f))) {
   const result = spawnSync(process.execPath, ['--check', filename], { encoding: 'utf8' });
   if (result.status !== 0) errors.push(`JavaScript syntax: ${path.relative(root, filename)}\n${result.stderr}`);
 }
-const core = Object.values(resources).find(r => /\/core-[\da-f]+\.js$/.test(r.url));
+const core = resources['game-core'];
 if (!core) errors.push('Missing core runtime');
 else {
   const text = fs.readFileSync(path.join(root, core.url), 'utf8');
