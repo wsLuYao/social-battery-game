@@ -1,6 +1,12 @@
 (function(root){
  'use strict';
  const doc=root.document,app=doc.getElementById('app');if(!app)return;
+ doc.addEventListener('pointerdown',()=>app.removeAttribute('data-keyboard-nav'),true);
+ doc.addEventListener('keydown',event=>{
+  if(event.key==='Tab'||event.key.startsWith('Arrow')||event.key==='Enter'||event.key===' '){
+   app.setAttribute('data-keyboard-nav','');
+  }
+ },true);
  const editable=el=>!!el?.closest?.('input,textarea,[contenteditable]:not([contenteditable="false"]),[data-native-select]');
  const exportMedia=el=>!!el?.closest?.('[data-native-media]');
  const surfaces='[data-gesture-surface],.sw4-board,.sw4-rack,.sw4-order,.cat-v4,.phone-v4-feed,.gaming-board,#world,#joystick';

@@ -71,7 +71,7 @@ const core = resources['game-core'];
 if (!core) errors.push('Missing core runtime');
 else {
   const text = fs.readFileSync(path.join(root, core.url), 'utf8');
-  const match = text.match(/const SHARE_GAME_QR = (\{.*?\});/);
+  const match = text.match(/const SHARE_GAME_QR = (?:root\.SOCIAL_BATTERY_SHARE_QR \|\| )?(\{.*?\});/);
   if (!match) errors.push('Missing receipt QR data');
   else {
     const qr = JSON.parse(match[1]);

@@ -134,9 +134,11 @@
  function makeOverlay(){
   if(overlay)return overlay;
   overlay=doc.getElementById('game-initial-loading')||doc.createElement('section');overlay.className='scene-loader';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','场景资源准备');
-  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true"><div class="scene-load-row"></div><div class="scene-load-row"></div></div><div class="scene-load-card"><div class="scene-load-progress"><h2 data-load-title></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-label="资源准备进度" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><p class="scene-load-duration" data-load-duration>加载可能需要约 1 分钟，请耐心等待。</p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div><div class="load-play"></div></div>';
+  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true"><div class="scene-load-row"></div><div class="scene-load-row"></div></div><div class="scene-load-card"><div class="scene-load-progress"><h2 data-load-title><span></span></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-label="资源准备进度" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><p class="scene-load-duration" data-load-duration>准备好后会自动进入；接星星不影响加载进度。</p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div><div class="load-play"></div></div>';
   overlay.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Tab'){const buttons=[...overlay.querySelectorAll('button,[tabindex="0"]')].filter(b=>!b.closest('[hidden]')&&!b.disabled);if(!buttons.length){e.preventDefault();return;}if(e.shiftKey&&doc.activeElement===buttons[0]){e.preventDefault();buttons.at(-1).focus({preventScroll:true});}else if(!e.shiftKey&&doc.activeElement===buttons.at(-1)){e.preventDefault();buttons[0].focus({preventScroll:true});}}});
-  doc.getElementById('app').appendChild(overlay);loadingPlay=root.GameLoadingPlay?.create(overlay.querySelector('.load-play'));return overlay;
+  doc.getElementById('app').appendChild(overlay);
+  loadingPlay=root.GameLoadingPlay?.create(overlay.querySelector('.load-play'));
+  return overlay;
  }
  function loadingEvent(active){doc.getElementById('app').classList.toggle('is-resource-loading',active);root.dispatchEvent?.(new CustomEvent('game:loading',{detail:{active}}));}
  function loadingTitle(v,s){
@@ -151,7 +153,12 @@
  }
  function paint(v){
   const s=stats(v.groups),el=makeOverlay(),percent=el.querySelector('[data-load-percent]');
-  el.querySelector('[data-load-title]').textContent=loadingTitle(v,s);
+  const heading=el.querySelector('[data-load-title] span'),title=loadingTitle(v,s);
+  if(heading.textContent!==title){
+   heading.textContent=title;
+   const units=Array.from(title).reduce((width,char)=>width+(char.charCodeAt(0)<128?.85:1.02),.25);
+   heading.style.setProperty('--load-title-units',String(units));
+  }
   percent.textContent=(v.progressLabel||'场景准备')+' '+s.percent+'%';percent.setAttribute('aria-valuenow',s.percent);
   el.querySelectorAll('.scene-load-cell').forEach((cell,i)=>{const fill=Math.max(0,Math.min(1,(s.percent-i*10)/10));cell.firstElementChild.style.width=(fill*100)+'%';cell.classList.toggle('is-current',!s.complete&&s.percent>=i*10&&s.percent<(i+1)*10);});
   if(v.previous!==s.done){v.previous=s.done;v.lastProgress=Date.now();}
@@ -161,9 +168,6 @@
   if(Date.now()-v.lastProgress>8000&&!failed)text='仍在准备'+(s.current?'「'+s.current.label+'」':'场景')+'，网络较慢时可能需要稍等。';
   if(failed){const err=failed.error;text=(root.navigator?.onLine===false?'网络已断开，请恢复连接后重试。':err?.code==='timeout'?'连接超时，请重试。':err?.code==='decode'?'画面文件未能打开，请重试。':'素材未能载入，请重试。')+' 已准备好的部分会保留。';}
   el.querySelector('[data-load-status]').textContent=text;
-  let duration=el.querySelector('[data-load-duration]');
-  if(!duration){duration=doc.createElement('p');duration.className='scene-load-duration';duration.setAttribute('data-load-duration','');el.querySelector('.scene-load-actions').before(duration);}
-  duration.textContent='准备好后会自动进入；接星星不影响加载进度。';
   el.querySelector('.scene-load-actions').hidden=!failed;
   return s;
  }
@@ -175,9 +179,9 @@
   const revealNow=()=>{if(view===owner){makeOverlay().hidden=false;loadingPlay?.start();owner.shown=Date.now();paint(owner);}};
   let reveal=options.immediate?null:setTimeout(revealNow,140);
   if(options.immediate)revealNow();
-  const refresh=()=>{if(view===owner){const s=paint(owner);if(s.failed.length&&!owner.shown){clearTimeout(reveal);makeOverlay().hidden=false;loadingPlay?.start();owner.shown=Date.now();}}};listeners.add(refresh);const heartbeat=setInterval(refresh,1000);
+  const refresh=()=>{if(view===owner){const s=paint(owner);if(s.failed.length&&!owner.shown){clearTimeout(reveal);revealNow();}}};listeners.add(refresh);const heartbeat=setInterval(refresh,1000);
   function end(ok){if(view!==owner)return;clearTimeout(reveal);clearInterval(heartbeat);listeners.delete(refresh);loadingPlay?.stop();if(overlay)overlay.hidden=true;view=null;loadingEvent(false);owner.finish(ok);if(!ok)root.GameRuntime?.returnToCover?.();}
-  async function attempt(){try{await ensure(groups);if(view!==owner)return;await options.onReady?.();if(view!==owner)return;paint(owner);const remain=owner.shown?Math.max(0,180-(Date.now()-owner.shown)):0;if(remain)await new Promise(r=>setTimeout(r,remain));end(true);}catch(error){if(view!==owner)return;owner.error=error;refresh();if(!owner.shown){clearTimeout(reveal);makeOverlay().hidden=false;owner.shown=Date.now();}makeOverlay().querySelector('[data-load-retry]')?.focus({preventScroll:true});}}
+  async function attempt(){try{await ensure(groups);if(view!==owner)return;await options.onReady?.();if(view!==owner)return;paint(owner);const remain=owner.shown?Math.max(0,180-(Date.now()-owner.shown)):0;if(remain)await new Promise(r=>setTimeout(r,remain));end(true);}catch(error){if(view!==owner)return;owner.error=error;refresh();if(!owner.shown){clearTimeout(reveal);revealNow();}makeOverlay().querySelector('[data-load-retry]')?.focus({preventScroll:true});}}
   const el=makeOverlay();el.querySelector('[data-load-retry]').onclick=()=>{retry(groups);owner.error=null;el.querySelector('.scene-load-actions').hidden=true;owner.lastProgress=Date.now();attempt();};el.querySelector('[data-load-back]').hidden=options.allowCancel===false;el.querySelector('[data-load-back]').onclick=()=>{if(options.allowCancel!==false)end(false);};
   attempt();return owner.promise;
  }

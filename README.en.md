@@ -12,7 +12,7 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
-**Current release: [v22 · 2026-11-17](version.json)**
+**Current release: [v23 · 2026-11-17](version.json)**
 
 ## What you can do
 
@@ -62,23 +62,23 @@ flowchart TD
 
 ## A receipt of the evening
 
-The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure energy and stamps from events in the current playthrough. The printing preview remains horizontal. The save panel offers previews of a 1200×1200 square PNG and a 2000×1040 landscape PNG with the printer beside the ticket. Native image sharing and long-press saving default to the square image. The recharge guide also records the lowest energy of the evening. The receipt QR code links to the official game.
+The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure energy and stamps from events in the current playthrough. After printing, use the display settings to switch the receipt between collected stamps and the character gallery. The save panel offers previews of a 1200×1200 square PNG and a 2000×1040 landscape PNG with the printer beside the ticket. Native image sharing and long-press saving default to the square image. The recharge guide also records the lowest energy of the evening. The receipt QR code links to the official game.
 
 Sharing adapts to the device: system image sharing, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
-Both examples below were produced by the **v21 game receipt renderer** from the same sample records, using the advance-planning cat character.
+Both examples below were produced by the **v23 game receipt renderer** from the same sample records, using the advance-planning cat character.
 
 **Square receipt · 1200×1200**
 
 A slim printer sits above the wide ticket. This is the default format for native image sharing and long-press saving.
 
-![v21 square receipt example](docs/screenshots/receipt-square-v21.png)
+![v23 square receipt example](docs/screenshots/receipt-square-v23.png)
 
 **Landscape receipt · 2000×1040**
 
 The full printer sits beside the horizontal ticket. Choose this format in the save panel, preview the image, then confirm the download.
 
-![v21 landscape receipt example](docs/screenshots/receipt-landscape-v21.png)
+![v23 landscape receipt example](docs/screenshots/receipt-landscape-v23.png)
 
 ## Run locally
 
@@ -114,7 +114,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-The current release is **v22 · November 17, 2026**, based on the lightweight loading and sharing optimization bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v23 · November 17, 2026**, based on the lightweight interface and receipt update. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 

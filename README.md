@@ -7,7 +7,7 @@
   <a href="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml"><img alt="静态验证" src="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml/badge.svg"></a>
   <img alt="HTML · CSS · JavaScript" src="https://img.shields.io/badge/Web-HTML%20%2F%20CSS%20%2F%20JS-c7a15c">
   <img alt="存档保存在浏览器" src="https://img.shields.io/badge/Save-LocalStorage-8f83ad">
-  <img alt="当前版本 v22" src="https://img.shields.io/badge/Release-v22-d7947d">
+  <img alt="当前版本 v23" src="https://img.shields.io/badge/Release-v23-d7947d">
   <p><strong>聚会可以尽兴，离场可以从容，独处也可以好好充电。</strong></p>
   <p><a href="https://wsluyao.github.io/social-battery-game/">立即游玩</a> · <a href="#它能做什么">玩法介绍</a> · <a href="docs/deployment.md">部署说明</a></p>
 </div>
@@ -18,7 +18,7 @@
 
 ![游戏封面与角色选择](docs/screenshots/cover.jpg)
 
-**当前版本：[v22 · 2026-11-17](version.json)**
+**当前版本：[v23 · 2026-11-17](version.json)**
 
 ## 它能做什么
 
@@ -121,23 +121,23 @@ flowchart LR
 
 - **对应本局的相处角色**：角色像素形象、专属配色、角色寄语和标签共同呈现这一晚的社交节奏。
 - **回看当晚电量**：小票展示离场电量，充电说明书可回看今晚最低电量。
-- **收藏经历印记**：小票根据当晚实际发生的事件点亮印记，区分这一晚的经历与长期累计的角色图鉴。
+- **收藏经历印记**：小票根据当晚实际发生的事件点亮印记，出票后可点击「调整展示」，在当晚收藏印记与角色图鉴之间切换。
 - **保存一致的画面**：横向出票预览保留打印机演出；保存面板提供 1200×1200 方形和 2000×1040 长方形两种 PNG。方形采用顶部窄条打印机与宽票面，长方形保留侧边打印机与横向出纸构图。系统图片分享与长按保存默认采用方形。
 - **邀请朋友来体验**：票据附游戏二维码；分享入口提供微信、朋友圈、QQ、QQ 空间及链接等路径，并根据设备能力提供系统图片分享、保存图片或复制文案与链接。
 
-以下两张图片均由 **v21 实际小票渲染器**使用同一组游戏示例记录生成。示例角色为“提前预约型充电猫”，展示相同的离场电量与当晚印记，便于比较两种构图。
+以下两张图片均由 **v23 实际小票渲染器**使用同一组游戏示例记录生成。示例角色为“提前预约型充电猫”，展示相同的离场电量与当晚印记，便于比较两种构图。
 
 **方形小票 · 1200×1200**
 
 顶部窄条像素打印机连接宽票面，适合手机相册和方形图片分享。系统图片分享与长按保存默认使用此格式。
 
-![v21 方形小票示例，1200×1200](docs/screenshots/receipt-square-v21.png)
+![v23 方形小票示例，1200×1200](docs/screenshots/receipt-square-v23.png)
 
 **长方形小票 · 2000×1040**
 
 左侧完整像素打印机连接横向票据，保留出票演出的构图，适合横屏展示。保存面板可切换到此格式，预览后确认下载。
 
-![v21 长方形小票示例，2000×1040](docs/screenshots/receipt-landscape-v21.png)
+![v23 长方形小票示例，2000×1040](docs/screenshots/receipt-landscape-v23.png)
 
 小票从本局数据到分享的过程：
 
@@ -145,7 +145,8 @@ flowchart LR
 flowchart LR
     A[本局角色、电量与经历印记] --> B[生成横向小票]
     B --> C[像素打印机送纸与音效]
-    C --> D[预览并展开分享选项]
+    C --> D[小票预览]
+    D --> M[调整展示：收藏印记或角色图鉴]
     D --> E[保存面板预览并选择格式]
     E --> S[1200×1200 方形 PNG]
     E --> L[2000×1040 长方形 PNG]
@@ -179,7 +180,7 @@ python -m http.server 8000
 ## 工作方式与数据
 
 - **页面**：HTML、CSS 与原生 JavaScript，结合 Canvas 场景和页面交互层。
-- **资源**：图片、音频和运行文件随仓库分发，由资源清单统一加载。大部分图片采用 WebP 压缩，音频采用 MP3 压缩，资源由清单统一加载。
+- **资源**：图片、音频和运行文件随仓库分发，由资源清单统一加载。大部分图片采用 WebP 压缩，音频采用 MP3 压缩。
 - **存档**：进度、设置与图鉴保存在当前浏览器的 LocalStorage，没有账号或云端同步。
 - **分享**：玩家主动保存图片、复制文案或选择分享入口；小票二维码指向在线游戏。
 
@@ -202,7 +203,7 @@ python -m http.server 8000
 └── .nojekyll                  # GitHub Pages 静态发布标记
 ```
 
-当前版本为 **v22 · 2026-11-17**，基于加载与分享优化的轻量部署包，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
+当前版本为 **v23 · 2026-11-17**，基于界面与小票优化的轻量部署包，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
 
 ## 验证与部署
 
