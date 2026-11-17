@@ -2,7 +2,7 @@
  'use strict';
  const M=root.GAME_RESOURCE_MANIFEST||{resources:{},groups:{}},doc=root.document;
  const records=new Map(),urls=new Map(),listeners=new Set(),gates=new Map();
- const queue=[],active=new Set();let sequence=0,foreground=0,overlay=null,view=null,currentOptional=new Set();
+ const queue=[],active=new Set();let sequence=0,foreground=0,overlay=null,view=null,loadingPlay=null,currentOptional=new Set();
  const empty='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
  const abs=value=>{try{return new URL(value,doc?.baseURI||root.location?.href||'http://game.local/').href;}catch{return value;}};
  for(const [id,item] of Object.entries(M.resources)){
@@ -116,9 +116,9 @@
  function makeOverlay(){
   if(overlay)return overlay;
   overlay=doc.getElementById('game-initial-loading')||doc.createElement('section');overlay.className='scene-loader';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','场景资源准备');
-  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true">'+Array.from({length:7},()=>'<div class="scene-load-row"></div>').join('')+'</div><div class="scene-load-card"><h2 data-load-title></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div>';
-  overlay.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Tab'){const buttons=[...overlay.querySelectorAll('button')].filter(b=>!b.closest('[hidden]'));if(!buttons.length){e.preventDefault();return;}if(e.shiftKey&&doc.activeElement===buttons[0]){e.preventDefault();buttons.at(-1).focus({preventScroll:true});}else if(!e.shiftKey&&doc.activeElement===buttons.at(-1)){e.preventDefault();buttons[0].focus({preventScroll:true});}}});
-  doc.getElementById('app').appendChild(overlay);return overlay;
+  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true"><div class="scene-load-row"></div><div class="scene-load-row"></div></div><div class="scene-load-card"><div class="scene-load-progress"><h2 data-load-title></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-label="资源准备进度" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><p class="scene-load-duration" data-load-duration>加载可能需要约 1 分钟，请耐心等待。</p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div><div class="load-play"></div></div>';
+  overlay.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Tab'){const buttons=[...overlay.querySelectorAll('button,[tabindex="0"]')].filter(b=>!b.closest('[hidden]')&&!b.disabled);if(!buttons.length){e.preventDefault();return;}if(e.shiftKey&&doc.activeElement===buttons[0]){e.preventDefault();buttons.at(-1).focus({preventScroll:true});}else if(!e.shiftKey&&doc.activeElement===buttons.at(-1)){e.preventDefault();buttons[0].focus({preventScroll:true});}}});
+  doc.getElementById('app').appendChild(overlay);loadingPlay=root.GameLoadingPlay?.create(overlay.querySelector('.load-play'));return overlay;
  }
  function loadingEvent(active){doc.getElementById('app').classList.toggle('is-resource-loading',active);root.dispatchEvent?.(new CustomEvent('game:loading',{detail:{active}}));}
  function paint(v){
@@ -128,6 +128,7 @@
   el.querySelectorAll('.scene-load-cell').forEach((cell,i)=>{const fill=Math.max(0,Math.min(1,(s.percent-i*10)/10));cell.firstElementChild.style.width=(fill*100)+'%';cell.classList.toggle('is-current',!s.complete&&s.percent>=i*10&&s.percent<(i+1)*10);});
   if(v.previous!==s.done){v.previous=s.done;v.lastProgress=Date.now();}
   const failed=s.failed[0]||(v.error?{error:v.error}:null);
+  el.classList.toggle('has-load-error',!!failed);
   let text=s.complete?'画面已准备好':s.current?(s.current.phase==='decode'?'正在展开':'正在准备')+'「'+s.current.label+'」':'正在等待准备';
   if(Date.now()-v.lastProgress>8000&&!failed)text='仍在准备'+(s.current?'「'+s.current.label+'」':'场景')+'，网络较慢时可能需要稍等。';
   if(failed){const err=failed.error;text=(root.navigator?.onLine===false?'网络已断开，请恢复连接后重试。':err?.code==='timeout'?'连接超时，请重试。':err?.code==='decode'?'画面文件未能打开，请重试。':'素材未能载入，请重试。')+' 已准备好的部分会保留。';}
@@ -143,11 +144,11 @@
   if(view){const pending=view,same=groupIds(groups).every(id=>groupIds(pending.groups).includes(id));const ok=await pending.promise;if(!ok)return false;return same&&ready(groups)?true:prepare(groups,options);}
   const owner={groups,title:options.title||M.groups[Array.isArray(groups)?groups.at(-1):groups]?.title||'正在准备下一段旅程',progressLabel:options.progressLabel,lastProgress:Date.now(),previous:-1,shown:0};
   view=owner;owner.promise=new Promise(resolve=>owner.finish=resolve);loadingEvent(true);
-  const revealNow=()=>{if(view===owner){makeOverlay().hidden=false;owner.shown=Date.now();paint(owner);}};
+  const revealNow=()=>{if(view===owner){makeOverlay().hidden=false;loadingPlay?.start();owner.shown=Date.now();paint(owner);}};
   let reveal=options.immediate?null:setTimeout(revealNow,140);
   if(options.immediate)revealNow();
-  const refresh=()=>{if(view===owner){const s=paint(owner);if(s.failed.length&&!owner.shown){clearTimeout(reveal);makeOverlay().hidden=false;owner.shown=Date.now();}}};listeners.add(refresh);const heartbeat=setInterval(refresh,1000);
-  function end(ok){if(view!==owner)return;clearTimeout(reveal);clearInterval(heartbeat);listeners.delete(refresh);if(overlay)overlay.hidden=true;view=null;loadingEvent(false);owner.finish(ok);if(!ok)root.GameRuntime?.returnToCover?.();}
+  const refresh=()=>{if(view===owner){const s=paint(owner);if(s.failed.length&&!owner.shown){clearTimeout(reveal);makeOverlay().hidden=false;loadingPlay?.start();owner.shown=Date.now();}}};listeners.add(refresh);const heartbeat=setInterval(refresh,1000);
+  function end(ok){if(view!==owner)return;clearTimeout(reveal);clearInterval(heartbeat);listeners.delete(refresh);loadingPlay?.stop();if(overlay)overlay.hidden=true;view=null;loadingEvent(false);owner.finish(ok);if(!ok)root.GameRuntime?.returnToCover?.();}
   async function attempt(){try{await ensure(groups);if(view!==owner)return;await options.onReady?.();if(view!==owner)return;paint(owner);const remain=owner.shown?Math.max(0,180-(Date.now()-owner.shown)):0;if(remain)await new Promise(r=>setTimeout(r,remain));end(true);}catch(error){if(view!==owner)return;owner.error=error;refresh();if(!owner.shown){clearTimeout(reveal);makeOverlay().hidden=false;owner.shown=Date.now();}makeOverlay().querySelector('[data-load-retry]')?.focus({preventScroll:true});}}
   const el=makeOverlay();el.querySelector('[data-load-retry]').onclick=()=>{retry(groups);owner.error=null;el.querySelector('.scene-load-actions').hidden=true;owner.lastProgress=Date.now();attempt();};el.querySelector('[data-load-back]').hidden=options.allowCancel===false;el.querySelector('[data-load-back]').onclick=()=>{if(options.allowCancel!==false)end(false);};
   attempt();return owner.promise;

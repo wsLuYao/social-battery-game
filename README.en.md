@@ -12,7 +12,7 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
-**Current release: [v19 · 2026-11-17](version.json)**
+**Current release: [v20 · 2026-11-17](version.json)**
 
 ## What you can do
 
@@ -41,6 +41,8 @@ Open **[the online game](https://wsluyao.github.io/social-battery-game/)**. No a
 
 ![Campus gathering](docs/screenshots/party.jpg)
 
+While assets load, move the box with the arrow keys, on-screen buttons, or by dragging to catch falling stars. The score stays on the loading screen.
+
 ## Psychology in the design
 
 The energy meter makes the evening’s choices visible: players can revisit how they joined activities, said goodbye, and chose rest or companionship. Six characters connect these choices to implementation intentions, social baseline theory, shared activities and interpersonal impressions, autonomous solitude and emotion regulation, mood management, and psychological detachment.
@@ -60,13 +62,13 @@ flowchart TD
 
 ## A receipt of the evening
 
-The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure and minimum energy, and stamps from events in the current playthrough. The printing preview remains horizontal. PNG export, native image sharing, and long-press saving use the same 1200×1200 square image with the printer and four selected stamps. Its QR code links to the official game.
+The recharge guide includes a pixel-printer sequence with soft printing audio. It produces a horizontal receipt showing the character, its colors and quote, departure energy and stamps from events in the current playthrough. The printing preview remains horizontal. PNG export, native image sharing, and long-press saving use the same 1200×1200 square image with a slim printer above the wide ticket and four selected stamps. The recharge guide also records the lowest energy of the evening. The receipt QR code links to the official game.
 
 Sharing adapts to the device: system image sharing, QQ web links, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
-![v19 exported 1200×1200 square receipt](docs/screenshots/receipt-square-v19.png)
+![v20 exported 1200×1200 square receipt](docs/screenshots/receipt-square-v20.png)
 
-*Actual v19 component with sample records. Printing remains horizontal; saved and shared images use a 1200×1200 square layout with four selected stamps.*
+*The v20 receipt renderer produced this 1200×1200 PNG from sample records. The in-game printing preview uses a horizontal layout.*
 
 ## Run locally
 
@@ -102,7 +104,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-The current release is **v19 · November 17, 2026**, based on the mobile adaptation and square receipt bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v20 · November 17, 2026**, based on the loading-screen starlight bundle. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 

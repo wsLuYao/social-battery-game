@@ -11,7 +11,7 @@ vm.runInNewContext(fs.readFileSync(path.join(root, 'src/runtime/manifest.js'), '
 const manifest = context.window.GAME_RESOURCE_MANIFEST;
 const resources = manifest.resources;
 const release = JSON.parse(fs.readFileSync(path.join(root, 'version.json'), 'utf8'));
-if (release.version !== 'v19' || release.build !== manifest.version) errors.push('Release version and resource manifest disagree');
+if (!/^v\d+$/.test(release.version) || release.build !== `${release.release_date?.replaceAll('-', '')}-${release.version}` || release.build !== manifest.version) errors.push('Release version and resource manifest disagree');
 const known = new Set([...Object.keys(manifest.aliases || {}), ...Object.values(resources).map(r => r.url)]);
 const exists = name => fs.existsSync(path.join(root, name));
 for (const [id, resource] of Object.entries(resources)) {

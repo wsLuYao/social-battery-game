@@ -586,9 +586,6 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
  const W=1600,H=740,ink='#303c2f';
  function theme(role){const color=/^#[a-f\d]{6}$/i.test(role?.color)?role.color:'#A8BF79',light=/^#[a-f\d]{6}$/i.test(role?.light)?role.light:'#EAF0D2';const rgb=color.slice(1).match(/../g).map(v=>parseInt(v,16)),base=[30,51,39];return{color,light,ink:'#'+rgb.map((n,i)=>Math.round(n*.48+base[i]*.52).toString(16).padStart(2,'0')).join('')};}
  const themeStyle=role=>{const t=theme(role);return `--receipt-accent:${t.color};--receipt-light:${t.light};--receipt-dark:${t.ink};`;};
- // Source-space slots differ slightly between the six hand-painted printer PNGs.
- // Normalize the real opening, keeping the entire silhouette inside the square.
- const squarePrinterSlots={cat:[616,748,354,1717],warm:[605,681,368,1699],walk:[649,746,346,1715],island:[648,745,348,1720],jelly:[605,681,368,1700],offline:[654,750,347,1720]};
  async function render(options){
   const {data,role,entries,loadImage,loadAsset,drawAssetFit,drawStampBase,drawTextBadge,fitFont,drawWrappedLines,qr}=options;
   const colors=theme(role),green=colors.ink;
@@ -642,76 +639,280 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   font(29,'700');ctx.textAlign='center';ctx.fillText('扫码来测测',1430,532);ctx.fillText('我的社交节奏',1430,575);ctx.textAlign='left';
   return canvas;
  }
+ // The approved square design uses a purpose-built shallow pixel printer.
+ // It is drawn in canvas so all six palettes stay exact, with no extra download.
+ function squarePrinter(ctx,colors){
+  const shape=(x,y,w,h,step=8)=>{ctx.beginPath();ctx.moveTo(x+step*2,y);ctx.lineTo(x+w-step*2,y);ctx.lineTo(x+w-step*2,y+step);ctx.lineTo(x+w-step,y+step);ctx.lineTo(x+w-step,y+step*2);ctx.lineTo(x+w,y+step*2);ctx.lineTo(x+w,y+h-step*2);ctx.lineTo(x+w-step,y+h-step*2);ctx.lineTo(x+w-step,y+h-step);ctx.lineTo(x+step,y+h-step);ctx.lineTo(x+step,y+h-step*2);ctx.lineTo(x,y+h-step*2);ctx.lineTo(x,y+step*2);ctx.lineTo(x+step,y+step*2);ctx.lineTo(x+step,y+step);ctx.lineTo(x+step*2,y+step);ctx.closePath();};
+  const panel=(x,y,w,h,fill,border,step=5)=>{shape(x,y,w,h,step);ctx.fillStyle=border;ctx.fill();shape(x+4,y+4,w-8,h-8,step);ctx.fillStyle=fill;ctx.fill();};
+  ctx.save();ctx.globalAlpha=.16;shape(78,56,1056,136);ctx.fillStyle='#303c2f';ctx.fill();ctx.restore();
+  panel(72,48,1056,136,'#4e795a','#264736',8);
+  ctx.fillStyle='#91ad85';ctx.fillRect(96,56,1008,5);ctx.fillRect(83,73,5,84);
+  ctx.fillStyle='#365b42';ctx.fillRect(104,123,990,8);ctx.fillRect(1109,76,6,68);
+  for(let i=0;i<4;i++){ctx.fillStyle='#294b36';ctx.fillRect(345+(i%2)*20,76+Math.floor(i/2)*18,13,6);}
+  for(const x of [168,242]){panel(x,69,53,49,colors.color,colors.ink);ctx.fillStyle=colors.light;ctx.fillRect(x+7,76,39,3);}
+  // Small physical controls, kept secondary to the printed result.
+  ctx.strokeStyle='#fff4cf';ctx.lineWidth=4;ctx.beginPath();ctx.arc(194,94,10,-.9,4.05);ctx.stroke();ctx.fillStyle='#fff4cf';ctx.fillRect(192,80,4,13);ctx.fillRect(258,82,5,21);ctx.fillRect(270,82,5,21);
+  panel(462,65,84,61,colors.light,colors.ink,6);
+  ctx.strokeStyle=colors.ink;ctx.lineWidth=6;ctx.beginPath();ctx.arc(504,96,18,Math.PI,0);ctx.stroke();ctx.fillStyle=colors.ink;ctx.fillRect(483,95,9,19);ctx.fillRect(516,95,9,19);
+  panel(584,73,277,44,'#fff1c9','#304d38',4);
+  ctx.fillStyle='#304d38';ctx.font='800 24px "SocialBatteryUI",sans-serif';ctx.fillText('小票已印好',610,103);
+  [9,14,19].forEach((h,i)=>ctx.fillRect(795+i*13,106-h,8,h));
+  panel(973,71,77,47,colors.color,colors.ink,5);ctx.fillStyle=colors.ink;for(let i=0;i<4;i++)ctx.fillRect(990+i*10,82,4,21);
+  ctx.fillStyle='#f6ce66';ctx.fillRect(925,88,22,9);
+  panel(96,140,1008,37,'#18291f','#7e9a76',5);
+  ctx.fillStyle='#151c18';ctx.fillRect(108,149,984,22);ctx.fillStyle='#6d7364';ctx.fillRect(116,151,968,5);
+  return{left:108,right:1092,top:149,bottom:171};
+ }
+ function blendColor(from, to, amount){
+  const target=to.slice(1).match(/../g);
+  return '#'+from.slice(1).match(/../g).map((part,i)=>{
+   const start=parseInt(part,16), end=parseInt(target[i],16);
+   return Math.round(start+(end-start)*amount).toString(16).padStart(2,'0');
+  }).join('');
+ }
+
+ function squarePalette(colors){
+  return {
+   text:blendColor(colors.color,'#221a28',.82),
+   edge:blendColor(colors.color,'#493453',.35),
+   mark:blendColor(colors.color,'#6b4c70',.34),
+   fill:blendColor(colors.light,colors.color,.20),
+   ribbon:blendColor(colors.light,colors.color,.28),
+   highlight:blendColor(colors.light,'#fffbee',.68)
+  };
+ }
+
+ // Integer steps keep the corners crisp when the ticket is saved or shared.
+ function steppedBox(ctx,x,y,w,h,step,fill,oppositeCorners=false){
+  const right=x+w,bottom=y+h;
+  ctx.beginPath();
+  ctx.moveTo(x+2*step,y);
+  if(!oppositeCorners){
+   ctx.lineTo(right-2*step,y);
+   ctx.lineTo(right-2*step,y+step);
+   ctx.lineTo(right-step,y+step);
+   ctx.lineTo(right-step,y+2*step);
+   ctx.lineTo(right,y+2*step);
+  }else ctx.lineTo(right,y);
+  ctx.lineTo(right,bottom-2*step);
+  ctx.lineTo(right-step,bottom-2*step);
+  ctx.lineTo(right-step,bottom-step);
+  ctx.lineTo(right-2*step,bottom-step);
+  ctx.lineTo(right-2*step,bottom);
+  if(!oppositeCorners){
+   ctx.lineTo(x+2*step,bottom);
+   ctx.lineTo(x+2*step,bottom-step);
+   ctx.lineTo(x+step,bottom-step);
+   ctx.lineTo(x+step,bottom-2*step);
+   ctx.lineTo(x,bottom-2*step);
+  }else ctx.lineTo(x,bottom);
+  ctx.lineTo(x,y+2*step);
+  ctx.lineTo(x+step,y+2*step);
+  ctx.lineTo(x+step,y+step);
+  ctx.lineTo(x+2*step,y+step);
+  ctx.closePath();
+  ctx.fillStyle=fill;
+  ctx.fill();
+ }
+
+ function cornerSpark(ctx,x,y){
+  ctx.fillStyle='#bd8738';
+  ctx.fillRect(x-5,y-15,10,30);
+  ctx.fillRect(x-15,y-5,30,10);
+  ctx.fillStyle='#ffe097';
+  ctx.fillRect(x-3,y-13,6,26);
+  ctx.fillRect(x-13,y-3,26,6);
+  ctx.fillStyle='#fff5ce';
+  ctx.fillRect(x-1,y-10,3,13);
+  ctx.fillRect(x-10,y-1,12,3);
+ }
+
+ function invitationRibbon(ctx,x,y,w,h,fill){
+  const tip=x+w, middle=y+Math.floor(h/2), bottom=y+h;
+  ctx.beginPath();
+  ctx.moveTo(x+10,y);
+  ctx.lineTo(tip-19,y);
+  ctx.lineTo(tip-19,y+7);
+  ctx.lineTo(tip-13,y+7);
+  ctx.lineTo(tip-13,middle-7);
+  ctx.lineTo(tip-6,middle-7);
+  ctx.lineTo(tip-6,middle-3);
+  ctx.lineTo(tip,middle-3);
+  ctx.lineTo(tip,middle+3);
+  ctx.lineTo(tip-6,middle+3);
+  ctx.lineTo(tip-6,middle+7);
+  ctx.lineTo(tip-13,middle+7);
+  ctx.lineTo(tip-13,bottom-7);
+  ctx.lineTo(tip-19,bottom-7);
+  ctx.lineTo(tip-19,bottom);
+  ctx.lineTo(x+10,bottom);
+  ctx.lineTo(x+10,bottom-5);
+  ctx.lineTo(x,bottom-5);
+  ctx.lineTo(x,y+5);
+  ctx.lineTo(x+10,y+5);
+  ctx.closePath();
+  ctx.fillStyle=fill;
+  ctx.fill();
+ }
+
+ function squarePaperPath(ctx,dx=0,dy=0){
+  const line=(x,y)=>ctx.lineTo(x+dx,y+dy);
+  ctx.beginPath();
+  ctx.moveTo(126+dx,164+dy);
+  line(1074,164);
+  for(let i=0;i<7;i++){
+   line(1074+i*8,176+i*12);
+   line(1082+i*8,176+i*12);
+  }
+  line(1130,1119);
+  line(1128,1124);
+  // Each pair of slopes forms one stepped tooth in the tear line.
+  const tooth=[[3,0],[3,4],[7,4],[7,8],[11,8],[11,12],[15,12],[15,16],[19,16],[19,12],[23,12],[23,8],[27,8],[27,4],[31,4],[31,0],[32,0]];
+  for(let x=1128;x>72;x-=32){
+   for(const [offset,depth] of tooth)line(x-offset,1124+depth);
+  }
+  line(70,1119);
+  line(70,248);
+  for(let i=6;i>=0;i--){
+   line(118-i*8,176+i*12);
+   line(126-i*8,176+i*12);
+  }
+  ctx.closePath();
+ }
+
+ function drawSquareQuote(ctx,quote,font,text,markColor){
+  const x=474,maxWidth=570;
+  let size=45,baselines=[486],lines=[quote];
+  font(size,'800');
+  if(ctx.measureText(quote).width>maxWidth){
+   size=40;
+   font(size,'800');
+  }
+  if(ctx.measureText(quote).width>maxWidth){
+   const chars=[...quote];
+   const pause=chars.findIndex((ch,i)=>i>=chars.length*.30&&i<chars.length*.65&&'，、；！？'.includes(ch));
+   const split=pause<0?Math.ceil(chars.length/2):pause+1;
+   lines=[chars.slice(0,split).join(''),chars.slice(split).join('')];
+   baselines=[453,499];
+   size=38;
+  }
+  font(size,'800');
+  const first=ctx.measureText(lines[0]),last=ctx.measureText(lines.at(-1));
+  font(53,'900');
+  const opening=ctx.measureText('“'),closing=ctx.measureText('”');
+  // Use the visible glyph edges. Full-width quote and period advances leave uneven gaps.
+  const left=x-(first.actualBoundingBoxLeft??0)-11-(opening.actualBoundingBoxRight??opening.width);
+  const right=x+(last.actualBoundingBoxRight??last.width)+11+(closing.actualBoundingBoxLeft??0);
+  const openingY=baselines[0]-(first.actualBoundingBoxAscent??size*.84)+(opening.actualBoundingBoxAscent??45)+2;
+  const closingY=baselines.at(-1)-(last.actualBoundingBoxAscent??size*.84)+(closing.actualBoundingBoxAscent??45)+2;
+  text('“',left,openingY,53,markColor,'900');
+  lines.forEach((line,i)=>text(line,x,baselines[i],size,ink,'800'));
+  text('”',right,closingY,53,markColor,'900');
+ }
+
  async function renderSquare(options){
   const {data,role,entries,loadImage,loadAsset,drawAssetFit,drawStampBase,drawTextBadge,fitFont,drawWrappedLines,qr}=options;
-  const colors=theme(role),assets=root.ReportAssets||{},art=root.ReceiptAssets||{};
-  const selected=entries.slice(0,4);
-  const [printer,sprite,logo,stamps]=await Promise.all([
-   loadImage(art['printer_'+data.roleId]||art.printer),loadImage(assets.sprites?.[data.roleId]||assets.svgs?.[data.roleId]||data.sprite),loadImage(assets.icons?.battery),
+  const colors=theme(role),palette=squarePalette(colors),assets=root.ReportAssets||{},selected=entries.slice(0,4);
+  const [sprite,stamps]=await Promise.all([
+   loadImage(assets.sprites?.[data.roleId]||assets.svgs?.[data.roleId]||data.sprite),
    Promise.all(selected.map(async entry=>{let image=null,assetId='';for(const id of [entry.info.assetId,entry.info.fallbackAsset,'stamp_task']){image=await loadAsset(id);if(image){assetId=id;break;}}return{...entry,image,assetId,badgeImage:await loadAsset(entry.info.badgeAsset)};}))
   ]);
-  if(!printer||!sprite)throw Error('小票素材未准备好');
+  if(!sprite)throw Error('角色素材未准备好');
   const canvas=document.createElement('canvas');canvas.width=canvas.height=1200;
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
   const font=(size,weight='400')=>ctx.font=`${weight} ${size}px "SocialBatteryUI","Microsoft YaHei","PingFang SC",sans-serif`;
   const text=(value,x,y,size,color=ink,weight='400')=>{font(size,weight);ctx.fillStyle=color;ctx.fillText(value,x,y);};
-  const dash=y=>{ctx.save();ctx.strokeStyle='#c9bfa3';ctx.lineWidth=2;ctx.setLineDash([5,8]);ctx.beginPath();ctx.moveTo(205,y);ctx.lineTo(975,y);ctx.stroke();ctx.restore();};
-  ctx.fillStyle='#fff6dc';ctx.fillRect(0,0,1200,1200);
-  ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=colors.ink;
-  for(let y=25;y<1200;y+=50)for(let x=25;x<1200;x+=50){ctx.fillRect(x,y+3,10,3);ctx.fillRect(x+3,y,3,10);}ctx.restore();
-  // The real pixel printer is turned so its existing right-hand slot faces down.
-  // Paper begins inside the black opening, not behind the machine's outer shell.
-  const pw=printer.naturalWidth||printer.width,ph=printer.naturalHeight||printer.height;
-  const slot=squarePrinterSlots[data.roleId]||squarePrinterSlots.cat,ps=.56;
-  const tx=600+ps*(slot[2]+slot[3])/2,ty=430-ps*(slot[0]+slot[1])/2;
-  ctx.save();ctx.translate(tx,ty);ctx.rotate(Math.PI/2);ctx.drawImage(printer,0,0,pw*ps,ph*ps);ctx.restore();
-  ctx.textAlign='center';[...'小票已印好'].forEach((ch,i)=>text(ch,tx-ps*650,ty+ps*(235+i*43),20,colors.ink,'700'));ctx.textAlign='left';
-  // Layout in paper coordinates, proportionally fitted under the actual opening.
-  const paperScale=720/830;
-  ctx.save();ctx.translate(240-170*paperScale,430-366*paperScale);ctx.scale(paperScale,paperScale);
-  const paper={x:170,y:366,w:830,h:786};
-  ctx.fillStyle='#423f3520';ctx.fillRect(paper.x+8,paper.y+8,paper.w,paper.h);
-  ctx.fillStyle='#fffbee';ctx.fillRect(paper.x,paper.y,paper.w,paper.h);
-  for(let x=paper.x;x<paper.x+paper.w;x+=24)ctx.fillRect(x+12,paper.y+paper.h,12,8);
-  // A narrow dark top edge gives a visible paper/roller contact inside the slot.
-  ctx.fillStyle='#252c25';ctx.fillRect(paper.x-2,paper.y-6,paper.w+4,6);
-  ctx.fillStyle='#ddd4bb';ctx.fillRect(paper.x,paper.y,paper.w,5);
-  if(logo)ctx.drawImage(logo,205,397,38,22);
-  text('今晚的充电小票',259,420,27,colors.ink,'800');
-  ctx.textAlign='right';text('NO. '+String(data.serial||'01').split('/')[0].trim().padStart(4,'0'),975,419,20,'#81785e');ctx.textAlign='left';dash(443);
-  ctx.fillStyle='#d6ccb2';ctx.fillRect(211,480,214,214);ctx.fillStyle=colors.light;ctx.fillRect(205,474,214,214);
-  ctx.strokeStyle=colors.ink;ctx.lineWidth=3;ctx.strokeRect(205,474,214,214);
-  const sw=sprite.naturalWidth||sprite.width,sh=sprite.naturalHeight||sprite.height,k=Math.min(180/sw,180/sh);
-  ctx.drawImage(sprite,222+(180-sw*k)/2,491+(180-sh*k)/2,sw*k,sh*k);
-  ctx.fillStyle='#f2c45c';for(const [x,y]of [[410,468],[199,681]]){ctx.fillRect(x-7,y,22,6);ctx.fillRect(x,y-7,6,22);}
-  text('我的社交节奏',452,497,24,colors.ink,'700');
-  fitFont(ctx,role.name,523,43,32,'900');ctx.fillStyle=ink;ctx.fillText(role.name,450,553);
-  ctx.fillStyle=colors.light;ctx.fillRect(452,568,523,7);
-  font(28,'700');ctx.fillStyle=ink;const leadLines=drawWrappedLines(ctx,role.profileLead||role.description||'',452,618,523,37,2);
-  font(23);ctx.fillStyle='#5a6254';drawWrappedLines(ctx,role.profileBody||'',452,618+leadLines*37+7,523,31,2);
+  const rule=y=>{ctx.save();ctx.strokeStyle='#bdaf9f';ctx.lineWidth=3;ctx.setLineDash([7,9]);ctx.beginPath();ctx.moveTo(96,y);ctx.lineTo(1104,y);ctx.stroke();ctx.restore();};
+  ctx.fillStyle='#fff6e3';ctx.fillRect(0,0,1200,1200);
+  ctx.fillStyle='#ddd3ba';for(let y=22;y<1200;y+=48)for(let x=26;x<1200;x+=48){ctx.fillRect(x,y+3,9,3);ctx.fillRect(x+3,y,3,9);}
+  const slot=squarePrinter(ctx,colors);
+  squarePaperPath(ctx,6,12);ctx.fillStyle='#e9dbc6';ctx.fill();
+  squarePaperPath(ctx,3,6);ctx.fillStyle='#ad9b89';ctx.fill();
+  squarePaperPath(ctx);ctx.fillStyle='#fffbee';ctx.fill();
+  ctx.fillStyle='#d5cbb5';ctx.fillRect(126,164,948,5);
+  const qrLayout={x:925,y:918,unit:5};
+  canvas.receiptLayout={printer:{x:72,y:48,w:1056,h:136},slot,paper:{x:70,y:164,w:1060,h:976},paperEntry:{x:126,y:164,w:948},qr:qrLayout};
+  ctx.strokeStyle=colors.ink;ctx.lineWidth=4;ctx.strokeRect(137,203,105,36);ctx.fillStyle=colors.ink;ctx.fillRect(244,213,7,16);for(let i=0;i<5;i++){ctx.fillStyle=i<4?colors.color:'#e6dbb6';ctx.fillRect(144+i*19,210,13,23);}
+  text('今晚的充电小票',280,242,48,ink,'900');ctx.textAlign='right';text('NO. '+String(data.serial||'01').split('/')[0].trim().padStart(4,'0'),1069,240,25,'#82786c','700');ctx.textAlign='left';rule(269);
+  steppedBox(ctx,118,304,282,296,9,'#ded2bd',true);
+  steppedBox(ctx,113,299,282,296,9,palette.edge,true);
+  steppedBox(ctx,118,304,272,286,8,palette.highlight,true);
+  steppedBox(ctx,123,309,262,276,7,palette.fill,true);
+  const sw=sprite.naturalWidth||sprite.width,sh=sprite.naturalHeight||sprite.height;
+  const k=Math.min(268/sw,268/sh);
+  ctx.drawImage(sprite,254-sw*k/2,449-sh*k/2,sw*k,sh*k);
+  cornerSpark(ctx,385,299);
+  cornerSpark(ctx,120,586);
+  steppedBox(ctx,426,283,263,46,5,palette.fill);
+  text('我的社交节奏',445,317,34,palette.text,'800');
+  fitFont(ctx,role.name,675,80,60,'900');ctx.fillStyle=ink;ctx.fillText(role.name,426,408);
+  drawSquareQuote(ctx,role.quote||'',font,text,palette.mark);
   const energy=Number.isFinite(data.departure)?Math.max(0,Math.min(100,data.departure)):null;
-  ctx.fillStyle=colors.light;ctx.fillRect(450,752,525,53);
-  text('离场电量',467,788,22,colors.ink,'700');
-  ctx.strokeStyle=colors.ink;ctx.lineWidth=2;ctx.strokeRect(575,769,128,22);ctx.fillStyle=colors.ink;ctx.fillRect(703,775,5,10);
-  for(let i=0;i<10;i++){ctx.fillStyle=energy!==null&&i<Math.round(energy/10)?colors.ink:'#d8d9bf';ctx.fillRect(580+i*12,773,8,14);}
-  ctx.textAlign='right';text(energy===null?'—':String(energy),914,790,35,ink,'800');text('/100',958,788,19,'#68715c');ctx.textAlign='left';
-  const quote='“'+(role.quote||'')+'”';fitFont(ctx,quote,222,23,20,'700');ctx.fillStyle=colors.ink;drawWrappedLines(ctx,quote,312,724,222,29,3,'center');ctx.textAlign='left';
-  let tagX=452;for(const tag of (role.tags||[]).slice(0,3)){font(21,'700');const width=ctx.measureText(tag).width+18;ctx.fillStyle=colors.light;ctx.fillRect(tagX,824,width,34);text(tag,tagX+9,848,21,colors.ink,'700');tagX+=width+9;}
-  dash(882);text('今晚收藏印记',205,922,24,colors.ink,'700');
-  const total=new Set((data.impressions||[]).map(item=>item.impressionId)).size,earned=stamps.filter(entry=>entry.earned).length;
-  ctx.textAlign='right';text(total>earned?`点亮 ${total} 枚 · 精选 ${earned} 枚`:`点亮 ${total} 枚`,780,919,18,'#81785e');ctx.textAlign='left';
-  stamps.forEach((entry,i)=>{
-   const x=205+i*145,y=943;drawStampBase(ctx,x,y,132,117,entry.earned);
-   const draw=(target,ox,oy)=>{drawAssetFit(target,entry.image,entry.assetId,ox+31,oy+10,70);if(entry.badgeImage)drawAssetFit(target,entry.badgeImage,entry.info.badgeAsset,ox+101,oy+9,23);else if(entry.info.badge)drawTextBadge(target,ox+113,oy+21,entry.info.badge);};
-   if(entry.earned)draw(ctx,x,y);else{const muted=document.createElement('canvas');muted.width=132;muted.height=85;const m=muted.getContext('2d');draw(m,0,0);const pixels=m.getImageData(0,0,132,85);for(let p=0;p<pixels.data.length;p+=4){const g=Math.round(.2126*pixels.data[p]+.7152*pixels.data[p+1]+.0722*pixels.data[p+2]);pixels.data[p]=pixels.data[p+1]=pixels.data[p+2]=g;pixels.data[p+3]=Math.round(pixels.data[p+3]*.36);}m.putImageData(pixels,0,0);ctx.drawImage(muted,x,y);}
-   font(19,entry.earned?'700':'400');ctx.fillStyle=entry.earned?ink:'#989b8a';drawWrappedLines(ctx,entry.info.label||'今晚收藏',x+66,y+101,116,21,1,'center');ctx.textAlign='left';
+  steppedBox(ctx,418,515,688,80,7,palette.ribbon);
+  text('离场电量',444,568,36,palette.text,'800');
+  steppedBox(ctx,620,534,228,42,3,palette.edge);
+  ctx.fillStyle=palette.edge;ctx.fillRect(847,545,9,20);
+  ctx.fillStyle='#fffdf0';ctx.fillRect(624,538,220,34);
+  for(let i=0;i<10;i++){
+   ctx.fillStyle=energy!==null&&i<Math.round(energy/10)?palette.edge:'#e9dfc1';
+   ctx.fillRect(629+i*21,542,17,26);
+  }
+  ctx.textAlign='right';
+  text(energy===null?'—':String(energy),1010,578,68,ink,'900');
+  text('/100',1085,573,32,palette.text,'400');
+  ctx.textAlign='left';
+  const lead=role.profileLead||role.description||'';
+  fitFont(ctx,lead,986,54,48,'900');ctx.fillStyle=ink;
+  drawWrappedLines(ctx,lead,112,676,986,58,1);
+  font(41,'700');drawWrappedLines(ctx,role.profileBody||'',112,739,986,49,1);
+  (role.tags||[]).slice(0,3).forEach((tag,i)=>{
+   const x=182+i*299;
+   steppedBox(ctx,x,776,244,66,6,blendColor(colors.color,'#ded2bd',.32));
+   steppedBox(ctx,x,772,244,66,6,colors.color);
+   steppedBox(ctx,x+4,776,236,58,5,palette.highlight);
+   steppedBox(ctx,x+7,779,230,52,4,palette.fill);
+   ctx.textAlign='center';text(tag,x+122,818,39,palette.text,'900');ctx.textAlign='left';
   });
-  // The invitation stays on the receipt, with a separate clear QR quiet zone.
-  ctx.fillStyle=colors.light;ctx.fillRect(205,1080,567,48);text('扫码来测测我的社交节奏',220,1113,26,colors.ink,'700');
-  ctx.fillStyle=colors.ink;ctx.fillRect(727,1101,28,4);ctx.fillRect(747,1094,4,18);ctx.fillRect(751,1098,4,10);
-  ctx.restore();
-  // QR stays on integer device pixels, independent of the paper's layout scale.
-  const qx=792,qy=930,unit=4;ctx.fillStyle='#fffdf5';ctx.fillRect(qx,qy,qr.rows.length*unit,qr.rows.length*unit);ctx.fillStyle=ink;
+  rule(862);
+  steppedBox(ctx,96,883,302,49,5,palette.fill);
+  text('今晚收藏印记',114,919,38,palette.text,'900');
+  stamps.forEach((entry,i)=>{
+   const x=97+i*142,y=950,w=138;
+   drawStampBase(ctx,x,y,w,146,entry.earned);
+   const draw=(target,ox,oy)=>{
+    drawAssetFit(target,entry.image,entry.assetId,ox+28,oy+13,82);
+    if(entry.badgeImage)drawAssetFit(target,entry.badgeImage,entry.info.badgeAsset,ox+103,oy+10,24);
+    else if(entry.info.badge)drawTextBadge(target,ox+115,oy+25,entry.info.badge);
+   };
+   if(entry.earned)draw(ctx,x,y);
+   else{
+    const muted=document.createElement('canvas');muted.width=w;muted.height=103;
+    const layer=muted.getContext('2d');draw(layer,0,0);
+    const pixels=layer.getImageData(0,0,w,103);
+    for(let p=0;p<pixels.data.length;p+=4){
+     const gray=Math.round(.2126*pixels.data[p]+.7152*pixels.data[p+1]+.0722*pixels.data[p+2]);
+     pixels.data[p]=pixels.data[p+1]=pixels.data[p+2]=gray;
+     pixels.data[p+3]=Math.round(pixels.data[p+3]*.36);
+    }
+    layer.putImageData(pixels,0,0);ctx.drawImage(muted,x,y);
+   }
+   font(20,entry.earned?'800':'400');ctx.fillStyle=entry.earned?ink:'#989b8a';
+   drawWrappedLines(ctx,entry.info.label||'今晚收藏',x+w/2,y+124,122,23,1,'center');
+  });
+  ctx.fillStyle=colors.color;ctx.fillRect(672,951,3,145);
+  ctx.fillStyle=palette.mark;ctx.fillRect(872,921,6,17);
+  for(let i=0;i<4;i++){
+   ctx.fillRect(894-2*i,918+4*i,6,5);
+   ctx.fillRect(913-4*i,935+3*i,6,5);
+  }
+  ctx.textAlign='center';text('扫码来测测',797,996,43,palette.text,'900');
+  invitationRibbon(ctx,682,1015,236,51,palette.fill);
+  text('我的社交节奏',795,1052,35,palette.text,'900');ctx.textAlign='left';
+  // Matrix modules and the complete four-module quiet zone use integer pixels.
+  const {x:qx,y:qy,unit}=qrLayout,qs=qr.rows.length*unit;
+  steppedBox(ctx,qx-4,qy-2,qs+12,qs+12,2,'#ded2bd');
+  steppedBox(ctx,qx-5,qy-5,qs+10,qs+10,2,'#e9dfce');
+  ctx.fillStyle='#fffdf5';ctx.fillRect(qx,qy,qs,qs);ctx.fillStyle=ink;
   qr.rows.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')ctx.fillRect(qx+i*unit,qy+j*unit,unit,unit);});
   return canvas;
  }
@@ -831,6 +1032,7 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
   let state = null;
   let side = 'front';
   let shareCanvas = null;
+  let imageGuideFocus = null;
   let receiptCanvas = null;
   let shareSelection = null;
   let sharePickerDraft = null;
@@ -1502,15 +1704,13 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
               </div>
 
           </aside>
-          <div class="image-share-guide" data-image-share-guide hidden>
-            <div class="image-share-menu-cue" aria-hidden="true"><span>···</span><svg viewBox="0 0 160 120"><path d="M144 108H96V76H56V20H20M20 20H48M20 20V48"/></svg></div>
-            <section class="image-share-guide-content" role="dialog" aria-modal="true" aria-labelledby="image-share-guide-title">
-              <img data-image-share-preview data-native-media alt="长按保存方形充电小票" draggable="false">
-              <div class="image-share-guide-copy"><h2 id="image-share-guide-title">把这一晚带给朋友</h2><p data-image-share-menu-copy></p><p class="image-share-note">小票请长按图片保存，再从相册发送；浏览器菜单分享的是游戏链接。</p><div class="image-share-guide-actions"><button type="button" data-image-share-save>保存方形小票</button><button type="button" data-image-share-dismiss>选择分享方式</button></div></div>
-            </section>
-          </div>
           <p class="r16-sr" data-receipt-announcement aria-live="polite"></p>
         </section>
+        <div class="image-share-guide" data-image-share-guide role="dialog" aria-modal="true" aria-labelledby="image-share-guide-title" hidden>
+          <div class="image-share-menu-cue" aria-hidden="true"><svg viewBox="0 0 220 220"><path d="M18 200C82 221 160 178 148 121C140 86 96 83 96 114C96 153 177 167 193 81C199 57 198 31 199 13M188 28L199 13L211 29"/></svg></div>
+          <div class="image-share-guide-content"><p id="image-share-guide-title" data-image-share-menu-copy>微信、QQ请点击左上角“···”分享</p></div>
+          <button type="button" class="image-share-guide-dismiss" data-image-share-dismiss aria-label="关闭分享引导">×</button>
+        </div>
       </div>
       <div class="report-modal" id="report-collection-modal" hidden>
         <section class="report-dialog report-collection-dialog report-pixel-card" role="dialog" aria-modal="true" aria-labelledby="report-collection-title">
@@ -1856,21 +2056,37 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     const open = typeof force === 'boolean' ? force : tray.hidden;
     tray.hidden = !open; button.setAttribute('aria-expanded', String(open));
   }
-  function hideImageShareGuide() {
+  // QQBrowser/MQQBrowser alone are regular browsers, not the QQ messaging app.
+  function shareBrowserEnvironment(ua = root.navigator?.userAgent || '') {
+    if (/MicroMessenger/i.test(ua)) return 'wechat';
+    if (/\bQQ\//i.test(ua) || /\bQzone\//i.test(ua)) return 'qq';
+    return '';
+  }
+  function hideImageShareGuide(restore = false) {
     const guide=$('[data-image-share-guide]');
     if(guide)guide.hidden=true;
+    const dialog=$('#report-share-modal .r16-dialog');if(dialog)dialog.inert=false;
+    const focus=imageGuideFocus;imageGuideFocus=null;
+    if(restore){
+      const target=focus?.isConnected&&!focus.disabled?focus:$('[data-receipt-options]');
+      target?.focus?.({preventScroll:true});
+    }
   }
   function showImageShareGuide() {
     const guide=$('[data-image-share-guide]');
-    if(!guide||!shareCanvas)return;
-    const image=$('[data-image-share-preview]');if(image)image.src=shareCanvas.toDataURL('image/png');
+    if(!shareBrowserEnvironment()||!guide||!shareCanvas)return false;
+    if(guide.hidden)imageGuideFocus=document.activeElement;
+    const dialog=$('#report-share-modal .r16-dialog');if(dialog)dialog.inert=true;
     guide.hidden=false;syncImageShareGuide();
     $('[data-image-share-dismiss]')?.focus({preventScroll:true});
+    return true;
   }
   function syncImageShareGuide() {
     const guide=$('[data-image-share-guide]');if(!guide||guide.hidden)return;
+    if(!shareBrowserEnvironment()){hideImageShareGuide();return;}
     const rotated=!!document.getElementById('app')?.classList.contains('is-rotated');
-    const copy=$('[data-image-share-menu-copy]');if(copy)copy.textContent=`在微信、QQ打开的请点击${rotated?'左上角':'右上角'}分享`;
+    const copy=$('[data-image-share-menu-copy]');if(copy)copy.textContent='微信、QQ请点击左上角“···”分享';
+    // In CSS landscape the real browser top-right corner is the game's top-left.
     guide.classList.toggle('menu-at-left',rotated);
   }
   function startReceiptPrint() {
@@ -2117,12 +2333,12 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
         if(current())shareStatus('已交给系统分享面板；是否发送以应用中的操作为准。');return;
       }
       shareHelp(channel,`长按或保存下面的方形小票，再打开${target}从相册发送。`,info);
-      if(mobile||wechat||qq||document.getElementById('app')?.classList.contains('mobile-landscape'))showImageShareGuide();
+      showImageShareGuide();
       shareStatus(`已准备好${target}的方形小票，可长按或保存图片。`);
     } catch (error) {
       if (!current()) return;
       if (error?.name === 'AbortError') shareStatus('已取消分享。');
-      else { shareHelp(channel,`系统未能打开分享。可重试「分享游戏链接」，或保存下图后到${target}分享。`,info);shareStatus('分享面板暂不可用，图片与链接仍可带走。'); }
+      else { shareHelp(channel,`系统未能打开分享。可重试「分享游戏链接」，或保存下图后到${target}分享。`,info);showImageShareGuide();shareStatus('分享面板暂不可用，图片与链接仍可带走。'); }
     } finally { if (current()) { shareBusy = false; syncShareControls(); } }
   }
 
@@ -2223,11 +2439,10 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     const print=$('[data-receipt-print]'); if(print)on(print,'click',startReceiptPrint);
     const more=$('[data-receipt-options]'); if(more)on(more,'click',()=>{
       toggleReceiptOptions();
-      if(!$('#receipt-share-options')?.hidden && (/Android|iPhone|iPad|iPod|Mobile|MicroMessenger|\bQQ\//i.test(root.navigator?.userAgent||'')||document.getElementById('app')?.classList.contains('mobile-landscape')))showImageShareGuide();
+      if(!$('#receipt-share-options')?.hidden)showImageShareGuide();
     });
-    const imageGuide=$('[data-image-share-guide]');if(imageGuide)on(imageGuide,'click',event=>{if(event.target===imageGuide)hideImageShareGuide();});
-    const imageDismiss=$('[data-image-share-dismiss]');if(imageDismiss)on(imageDismiss,'click',()=>{hideImageShareGuide();$('[data-share-channel]')?.focus({preventScroll:true});});
-    const imageSave=$('[data-image-share-save]');if(imageSave)on(imageSave,'click',saveShare);
+    const imageGuide=$('[data-image-share-guide]');if(imageGuide)on(imageGuide,'click',()=>hideImageShareGuide(true));
+    const imageDismiss=$('[data-image-share-dismiss]');if(imageDismiss)on(imageDismiss,'click',event=>{event.stopPropagation();hideImageShareGuide(true);});
     const guideDismiss=$('[data-guide-dismiss]');if(guideDismiss)on(guideDismiss,'click',()=>dismissReceiptGuide(true));
     on(document,'visibilitychange',()=>{
       if(document.hidden)receiptPrint?.audio?.pause();
@@ -2248,8 +2463,8 @@ window.GameResources.bindAssets(window.PORTRAIT_ASSETS);
     if (!state) return;
     const imageGuide=$('[data-image-share-guide]');
     if(imageGuide&&!imageGuide.hidden){
-      if(event.key==='Escape'){event.preventDefault();hideImageShareGuide();$('[data-receipt-options]')?.focus({preventScroll:true});return;}
-      if(event.key==='Tab'){event.preventDefault();const save=$('[data-image-share-save]'),dismiss=$('[data-image-share-dismiss]');(document.activeElement===save?dismiss:save)?.focus({preventScroll:true});return;}
+      if(event.key==='Escape'){event.preventDefault();hideImageShareGuide(true);return;}
+      if(event.key==='Tab'){event.preventDefault();$('[data-image-share-dismiss]')?.focus({preventScroll:true});return;}
     }
     if(receiptGuide?.active){
       if(event.key==='Escape'){event.preventDefault();dismissReceiptGuide(true);return;}
@@ -17313,7 +17528,7 @@ return `<div class="mini sw4-mini sw5-mini" data-game="snack"><div class="mini-b
         const author = (avatarId, avatarName, name, english, study, bio) => `<article class="author-v11-card"><header class="author-v11-head"><span class="author-v11-mark"><img src="${window.DormArt?.asset(avatarId) || window.DORM_ART_ASSETS?.[avatarId] || ''}" alt="${avatarName}的像素头像" draggable="false"></span><div><h3>${name}</h3><span class="author-v11-english" lang="en">${english}</span></div></header><div class="author-v11-school"><strong>华中师范大学心理学院</strong><p>${study}</p></div><div class="author-v11-bio"><h4>个人简介</h4><p>${bio}</p></div></article>`;
         const authors = author('avatar_partner_m_v5', '暖杏', '王政锠', 'Zhengchang Wang', '2024级 · 应用心理学专业', '关注大语言模型决策、计算建模与「心理学 × 人工智能」，尝试把心理学做成可以玩的东西。')
             + author('avatar_partner_f_v5', '青禾', '何品洁', 'Pinjie He', '2024级 · 应用心理学专业', '华中师范大学心理学院2024级应用心理学专业学生。');
-        modal(`<div class="support-v11 support-v11-about"><header class="support-v11-head"><h2>关于作者 <small style="font-size:.55em;font-weight:400">v19</small></h2></header><div class="support-v11-body"><div class="authors-v11">${authors}</div><section class="author-v11-contact" aria-labelledby="authorContactTitle"><h3 id="authorContactTitle">王政锠的联系入口</h3><div class="support-v11-links"><a href="https://www.zhengchang.wang/" target="_blank" rel="noopener noreferrer"><b>个人主页 <span aria-hidden="true">↗</span></b><span>zhengchang.wang</span></a><a href="https://github.com/wsLuYao" target="_blank" rel="noopener noreferrer"><b>GitHub <span aria-hidden="true">↗</span></b><span>@wsLuYao</span></a><a href="mailto:3038698603@qq.com"><b>邮箱</b><span>3038698603@qq.com</span></a></div></section><details class="support-v11-notes"><summary>关于本作、版权与素材</summary><div><p>这是一款心理科普与自我觉察向的互动小游戏，不构成心理诊断、治疗或专业建议。</p><p>© 2026 王政锠 · 华中师范大学心理学院。除特别注明外，游戏代码、文字与像素美术由作者原创；HUD 部分图标来自 Pixelarticons（MIT License）。</p><p>本仓库公开展示，未向项目原创内容授予开源或其他开放使用许可。未经相应权利人事先书面许可，禁止复制、改编、分发、重新部署或商业使用游戏代码、文字、图片及音频等内容；法律规定的例外、GitHub 平台条款允许的查看与 fork，以及第三方素材自身许可另行适用。</p><p>可通过本游戏提供的功能，保存与分享自己生成的充电小票用于个人非商业体验交流；这不授予提取素材、复制游戏或重新部署的许可。<a href="COPYRIGHT.md" target="_blank" rel="noopener noreferrer">完整版权与使用声明</a> · <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">第三方素材声明</a></p></div></details></div></div>`);
+        modal(`<div class="support-v11 support-v11-about"><header class="support-v11-head"><h2>关于作者 <small style="font-size:.55em;font-weight:400">v20</small></h2></header><div class="support-v11-body"><div class="authors-v11">${authors}</div><section class="author-v11-contact" aria-labelledby="authorContactTitle"><h3 id="authorContactTitle">王政锠的联系入口</h3><div class="support-v11-links"><a href="https://www.zhengchang.wang/" target="_blank" rel="noopener noreferrer"><b>个人主页 <span aria-hidden="true">↗</span></b><span>zhengchang.wang</span></a><a href="https://github.com/wsLuYao" target="_blank" rel="noopener noreferrer"><b>GitHub <span aria-hidden="true">↗</span></b><span>@wsLuYao</span></a><a href="mailto:3038698603@qq.com"><b>邮箱</b><span>3038698603@qq.com</span></a></div></section><details class="support-v11-notes"><summary>关于本作、版权与素材</summary><div><p>这是一款心理科普与自我觉察向的互动小游戏，不构成心理诊断、治疗或专业建议。</p><p>© 2026 王政锠 · 华中师范大学心理学院。除特别注明外，游戏代码、文字与像素美术由作者原创；HUD 部分图标来自 Pixelarticons（MIT License）。</p><p>本仓库公开展示，未向项目原创内容授予开源或其他开放使用许可。未经相应权利人事先书面许可，禁止复制、改编、分发、重新部署或商业使用游戏代码、文字、图片及音频等内容；法律规定的例外、GitHub 平台条款允许的查看与 fork，以及第三方素材自身许可另行适用。</p><p>可通过本游戏提供的功能，保存与分享自己生成的充电小票用于个人非商业体验交流；这不授予提取素材、复制游戏或重新部署的许可。<a href="COPYRIGHT.md" target="_blank" rel="noopener noreferrer">完整版权与使用声明</a> · <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">第三方素材声明</a></p></div></details></div></div>`);
 
     }
 
