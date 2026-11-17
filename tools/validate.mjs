@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
@@ -14,10 +15,37 @@ const release = JSON.parse(fs.readFileSync(path.join(root, 'version.json'), 'utf
 if (!/^v\d+$/.test(release.version) || release.build !== `${release.release_date?.replaceAll('-', '')}-${release.version}` || release.build !== manifest.version) errors.push('Release version and resource manifest disagree');
 const known = new Set([...Object.keys(manifest.aliases || {}), ...Object.values(resources).map(r => r.url)]);
 const exists = name => fs.existsSync(path.join(root, name));
+const hashPrefix = data => createHash('sha256').update(data).digest('hex').slice(0, 24);
+const packPaths = new Set();
+const packs = new Map();
+for (const [id, bundle] of Object.entries(manifest.bundles || {})) {
+  const filename = path.resolve(root, bundle.url);
+  if (!filename.startsWith(root + path.sep) || !bundle.url.startsWith('assets/packs/')) {
+    errors.push(`Invalid bundle path: ${id}`);
+    continue;
+  }
+  packPaths.add(bundle.url);
+  if (!fs.existsSync(filename)) {
+    errors.push(`Missing bundle: ${bundle.url}`);
+    continue;
+  }
+  const data = fs.readFileSync(filename);
+  if (data.length !== bundle.bytes) errors.push(`Wrong bundle size: ${bundle.url}`);
+  if (!bundle.url.endsWith(`-${hashPrefix(data)}.bin`)) errors.push(`Wrong bundle hash: ${bundle.url}`);
+  packs.set(id, data);
+}
 for (const [id, resource] of Object.entries(resources)) {
   const absolute = path.resolve(root, resource.url);
   if (!absolute.startsWith(root + path.sep)) errors.push(`Resource outside repository: ${id}`);
-  else if (!fs.existsSync(absolute)) errors.push(`Missing resource: ${resource.url}`);
+  else if (resource.bundle !== undefined) {
+    const pack = packs.get(resource.bundle);
+    const { offset, bytes } = resource;
+    if (!pack || !Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(bytes) || bytes <= 0 || offset + bytes > pack.length) {
+      errors.push(`Invalid bundle slice: ${id} in ${resource.bundle}`);
+    } else if (path.parse(resource.url).name !== hashPrefix(pack.subarray(offset, offset + bytes))) {
+      errors.push(`Wrong bundled resource hash: ${resource.url}`);
+    }
+  } else if (!fs.existsSync(absolute)) errors.push(`Missing resource: ${resource.url}`);
   else if (fs.statSync(absolute).size !== resource.bytes) errors.push(`Wrong byte count: ${resource.url}`);
   for (const dependency of resource.deps || []) {
     if (!resources[dependency]) errors.push(`Missing dependency: ${id} -> ${dependency}`);
@@ -30,6 +58,14 @@ for (const [group, spec] of Object.entries(manifest.groups)) {
 }
 for (const [alias, id] of Object.entries(manifest.aliases || {})) {
   if (!resources[id]) errors.push(`Broken alias: ${alias}`);
+}
+function validateQr(qr, url, origin) {
+  if (qr.url !== url) errors.push(`Wrong receipt QR destination: ${origin}`);
+  const rows = qr.rows;
+  if (!Array.isArray(rows) || rows.length < 29 || (rows.length - 29) % 4 !== 0 ||
+      rows.some(row => typeof row !== 'string' || row.length !== rows.length || /[^01]/.test(row))) {
+    errors.push(`Invalid receipt QR matrix: ${origin}`);
+  }
 }
 let canonical;
 for (const name of ['index.html', 'game.html']) {
@@ -45,6 +81,8 @@ for (const name of ['index.html', 'game.html']) {
   if (!url?.startsWith('https://')) errors.push(`Missing public canonical URL: ${name}`);
   if (canonical && canonical !== url) errors.push('Entry-point canonical URLs differ');
   canonical = url;
+  const qr = html.match(/window\.SOCIAL_BATTERY_SHARE_QR\s*=\s*(\{.*?\});/);
+  if (qr) validateQr(JSON.parse(qr[1]), canonical, name);
 }
 const files = [];
 function walk(dir) {
@@ -56,9 +94,10 @@ function walk(dir) {
   }
 }
 walk(root);
-const resourcePaths = new Set(Object.values(resources).map(resource => resource.url));
+const resourcePaths = new Set(Object.values(resources).filter(resource => resource.bundle === undefined).map(resource => resource.url));
 for (const filename of files) {
   const relative = path.relative(root, filename).split(path.sep).join('/');
+  if (relative.startsWith('assets/packs/') && !packPaths.has(relative)) errors.push(`Unreferenced release bundle: ${relative}`);
   if (relative.startsWith('assets/runtime/') && !resourcePaths.has(relative)) errors.push(`Unreferenced release asset: ${relative}`);
   if (relative.startsWith('src/runtime/') && /^core-|^game-/.test(path.basename(filename)) && !resourcePaths.has(relative)) errors.push(`Obsolete runtime: ${relative}`);
   if (/(?:^|\/)部署说明_v\d+\.md$|(?:^|\/)_(?:receipt_)?preview/.test(relative)) errors.push(`Obsolete or temporary release file: ${relative}`);
@@ -73,11 +112,7 @@ else {
   const text = fs.readFileSync(path.join(root, core.url), 'utf8');
   const match = text.match(/const SHARE_GAME_QR = (?:root\.SOCIAL_BATTERY_SHARE_QR \|\| )?(\{.*?\});/);
   if (!match) errors.push('Missing receipt QR data');
-  else {
-    const qr = JSON.parse(match[1]);
-    if (qr.url !== canonical) errors.push('Receipt QR URL differs from deployed URL');
-    if (qr.rows.length !== 37 || qr.rows.some(row => !/^[01]{37}$/.test(row))) errors.push('Invalid receipt QR matrix dimensions');
-  }
+  else validateQr(JSON.parse(match[1]), canonical, 'game runtime');
 }
 for (const filename of ['README.md', 'README.en.md']) {
   const text = fs.readFileSync(path.join(root, filename), 'utf8');
@@ -89,4 +124,4 @@ if (!exists('.nojekyll')) errors.push('Missing GitHub Pages static marker');
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
-} else console.log(`Passed ${release.version}: ${Object.keys(resources).length} resources, ${Object.keys(manifest.groups).length} groups, release versions, no obsolete assets, entry references, JavaScript syntax, README screenshots, and receipt QR destination.`);
+} else console.log(`Passed ${release.version}: ${Object.keys(resources).length} resources, ${packs.size} bundles, ${Object.keys(manifest.groups).length} groups, release versions, no obsolete assets, entry references, JavaScript syntax, README screenshots, and receipt QR destination.`);

@@ -8,7 +8,7 @@
     if (!host) return null;
     host.innerHTML = '<div class="load-play-heading"><h3>接住小星光</h3><output class="load-play-score" aria-label="小游戏收集数量">0 颗</output></div>' +
       '<p class="load-play-hint" id="loading-play-hint">左右移动接星星，越落越快，试试你的反应！</p>' +
-      '<canvas class="load-play-board" width="600" height="360" tabindex="0" data-gesture-surface aria-label="接星光小游戏，用左右方向键移动小盒子" aria-describedby="loading-play-hint"></canvas>' +
+      '<div class="load-play-stage"><canvas class="load-play-board" width="600" height="360" tabindex="0" data-gesture-surface aria-label="接星光小游戏，用左右方向键移动小盒子" aria-describedby="loading-play-hint"></canvas></div>' +
       '<div class="load-play-controls"><button type="button" data-play-left aria-label="向左移动小盒子"><span aria-hidden="true">←</span></button>' +
       '<p class="load-play-feedback" aria-live="polite">漏接也没关系</p><button type="button" data-play-right aria-label="向右移动小盒子"><span aria-hidden="true">→</span></button></div>';
     const canvas = host.querySelector('canvas'), ctx = canvas.getContext('2d');

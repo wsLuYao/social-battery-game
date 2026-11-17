@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#46353c" viewBox="0 0 24 24">
-  <!-- 十字方向键：中间用 evenodd 挖出十字凹槽，避免和“加号”混淆。 -->
-  <path fill-rule="evenodd" d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6zM11 5v6H5v2h6v6h2v-6h6v-2h-6V5z"/>
-</svg>

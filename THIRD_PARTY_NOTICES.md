@@ -13,7 +13,7 @@ MIT 许可仅适用于对应的第三方图标，不扩展到整款游戏、原�
 
 ## 字体
 
-- 部署包附带的 WOFF2 字体由资源清单中的 font 条目引用，位于 `assets/runtime/`。
+- 部署包附带的 WOFF2 字体由资源清单中的 font 条目引用，从 `assets/packs/` 中加载。
 - 随包版权信息：Copyright 2014–2021 Adobe，保留字体名称 “Source”。
 - 许可：SIL Open Font License 1.1；随包完整原文见 [OFL.txt](assets/fonts/OFL.txt)。
 

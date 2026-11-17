@@ -3,11 +3,17 @@
  const M=root.GAME_RESOURCE_MANIFEST||{resources:{},groups:{}},doc=root.document;
  const records=new Map(),urls=new Map(),listeners=new Set(),gates=new Map();
  const queue=[],active=new Set();let sequence=0,foreground=0,overlay=null,view=null,loadingPlay=null,currentOptional=new Set();
+ const bundles=new Map(Object.entries(M.bundles||{}).map(([id,item])=>[
+  id,{...item,status:'idle',members:[],received:0,attempt:0,error:null,blob:null}
+ ]));
+ const activeBundles=new Set();
+ let lastBundleUpdate=0;
  const empty='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E';
  const abs=value=>{try{return new URL(value,doc?.baseURI||root.location?.href||'http://game.local/').href;}catch{return value;}};
  for(const [id,item] of Object.entries(M.resources)){
   const rec={...item,id,status:'idle',phase:'',received:0,error:null,priority:20,order:0,promise:null,image:null,objectURL:'',controller:null};
   records.set(id,rec);urls.set(item.url,id);urls.set(abs(item.url),id);
+  bundles.get(item.bundle)?.members.push(rec);
  }
  for(const [path,id] of Object.entries(M.aliases||{})){urls.set(path,id);urls.set(abs(path),id);}
  const record=id=>records.get(id)||records.get(urls.get(id))||records.get(urls.get(abs(id)));
@@ -19,6 +25,7 @@
  const bound=new WeakSet();
  function bindAssets(map){if(!map||typeof map!=='object'||bound.has(map))return;bound.add(map);for(const key of Object.keys(map)){const value=map[key];if(value&&typeof value==='object')bindAssets(value);else if(typeof value==='string'&&record(value))Object.defineProperty(map,key,{enumerable:true,configurable:true,get:()=>resolve(value)});}}
  function source(r){return root.GAME_EMBEDDED_RESOURCES?.[r.id]||r.url;}
+ function isBundled(r){return !!r.bundle&&!root.GAME_EMBEDDED_RESOURCES?.[r.id];}
  function changed(){for(const fn of listeners)fn();}
  function task(r,priority=0){
   if(!r)return Promise.reject(Error('资源清单不完整'));
@@ -32,20 +39,110 @@
   if(firstRequest){r.order=++sequence;queue.push(r);}
   pump();return r.promise;
  }
+ function pumpBundles(){
+  if(activeBundles.size>=4||!bundles.size)return;
+  // Pack downloads have their own slots, separate from image and font decoders.
+  // A pack can serve several scenes and is requested only once.
+  const needed=[];
+  for(const pack of bundles.values()){
+   if(pack.status!=='idle')continue;
+   let first=null;
+   for(const r of pack.members){
+    if(r.status!=='queued'||r.parked||!isBundled(r))continue;
+    if(!first||r.priority<first.priority||r.priority===first.priority&&r.order<first.order)first=r;
+   }
+   if(first)needed.push({pack,priority:first.priority,order:first.order});
+  }
+  needed.sort((a,b)=>a.priority-b.priority||a.order-b.order);
+  for(const {pack,priority} of needed){
+   if(activeBundles.size>=4)break;
+   if(priority>0&&(foreground||activeBundles.size))break;
+   pack.status='loading';activeBundles.add(pack);runBundle(pack);
+  }
+ }
  function pump(){
+  pumpBundles();
   queue.sort((a,b)=>a.priority-b.priority||a.order-b.order);
-  while(active.size<4){const i=queue.findIndex(r=>r.status==='queued'&&!r.parked&&(r.priority===0||[...active].some(a=>a.deps?.includes(r.id))||(!foreground&&active.size<1)));if(i<0)break;const [r]=queue.splice(i,1);active.add(r);r.status='loading';run(r);}
+  while(active.size<4){
+   const i=queue.findIndex(r=>{
+    if(r.status!=='queued'||r.parked)return false;
+    const pack=isBundled(r)&&bundles.get(r.bundle);
+    if(pack&&(pack.status==='idle'||pack.status==='loading'))return false;
+    return r.priority===0||[...active].some(a=>a.deps?.includes(r.id))||(!foreground&&active.size<1);
+   });
+   if(i<0)break;
+   const [r]=queue.splice(i,1);active.add(r);r.status='loading';run(r);
+  }
  }
  function timeout(promise,ms,onTimeout){let timer;return Promise.race([promise,new Promise((_,reject)=>timer=setTimeout(()=>{onTimeout?.();reject(Object.assign(Error('连接超时'),{code:'timeout'}));},ms))]).finally(()=>clearTimeout(timer));}
+ async function download(input,signal,attempt,mime,onProgress){
+  const inline=input.startsWith('data:');
+  const response=await root.fetch(input,inline?{signal}:{signal,cache:attempt>1?'reload':'force-cache',credentials:'same-origin'});
+  if(!response.ok)throw Object.assign(Error('资源请求失败'),{code:'http',status:response.status});
+  onProgress(0);
+  if(inline||!response.body?.getReader){
+   const blob=await response.blob();
+   if(signal.aborted)throw Error('准备已中断');
+   return blob;
+  }
+  const reader=response.body.getReader(),chunks=[];
+  let received=0;
+  for(;;){
+   const {value,done}=await reader.read();
+   if(done)break;
+   if(signal.aborted)throw Error('准备已中断');
+   chunks.push(value);received+=value.byteLength;onProgress(received);
+  }
+  if(signal.aborted)throw Error('准备已中断');
+  return new Blob(chunks,{type:mime});
+ }
+ async function runBundle(pack){
+  const controller=new AbortController();
+  let timer,resetTimer;
+  const stalled=new Promise((_,reject)=>{
+   resetTimer=()=>{
+    clearTimeout(timer);
+    timer=setTimeout(()=>{
+     controller.abort();reject(Object.assign(Error('资源包连接超时'),{code:'timeout'}));
+    },M.timeoutMs||32000);
+   };
+  });
+  pack.attempt++;pack.received=0;pack.error=null;resetTimer();changed();
+  try{
+   const blob=await Promise.race([stalled,download(
+    pack.url,controller.signal,pack.attempt,'application/octet-stream',received=>{
+     if(controller.signal.aborted)return;
+     resetTimer();pack.received=received;
+     // Many chunks can arrive in one frame. The loader only needs one repaint.
+     const now=Date.now();
+     if(now-lastBundleUpdate>=60){lastBundleUpdate=now;changed();}
+    }
+   )]);
+   if(blob.size!==pack.bytes)throw Object.assign(Error('资源包不完整'),{code:'decode'});
+   pack.received=pack.bytes;pack.blob=blob;pack.status='ready';
+  }catch(error){
+   pack.error=error;pack.status='error';
+  }finally{
+   clearTimeout(timer);activeBundles.delete(pack);changed();pump();
+  }
+ }
  async function binary(r){
   const input=source(r),signal=r.controller.signal;r.phase='download';
-  if(input.startsWith('data:')){const response=await root.fetch(input,{signal});const blob=await response.blob();if(signal.aborted)throw Error('准备已中断');r.received=r.bytes;return blob;}
-  const response=await root.fetch(input,{signal,cache:r.attempt>1?'reload':'force-cache',credentials:'same-origin'});
-  if(!response.ok)throw Object.assign(Error('资源请求失败'),{code:'http',status:response.status});
-  if(!response.body?.getReader){const blob=await response.blob();if(signal.aborted)throw Error('准备已中断');r.received=r.bytes;return blob;}
-  const reader=response.body.getReader(),chunks=[];let received=0;
-  for(;;){const {value,done}=await reader.read();if(done)break;chunks.push(value);received+=value.byteLength;r.received=received;changed();}
-  if(signal.aborted)throw Error('准备已中断');r.received=r.bytes;return new Blob(chunks,{type:r.mime});
+  if(isBundled(r)){
+   const pack=bundles.get(r.bundle);
+   if(pack?.error){
+    const {message,code,status}=pack.error;
+    throw Object.assign(Error(message),{code,status});
+   }
+   if(!pack?.blob||!Number.isSafeInteger(r.offset)||r.offset<0||
+      !Number.isSafeInteger(r.bytes)||r.bytes<=0||r.offset+r.bytes>pack.blob.size){
+    throw Object.assign(Error('资源包索引不完整'),{code:'decode'});
+   }
+   r.received=r.bytes;
+   return pack.blob.slice(r.offset,r.offset+r.bytes,r.mime);
+  }
+  const blob=await download(input,signal,r.attempt,r.mime,n=>{if(n){r.received=n;changed();}});
+  r.received=r.bytes;return blob;
  }
  async function pixels(r,blob){
   const signal=r.controller.signal;r.phase='decode';changed();
@@ -110,11 +207,36 @@
  function preempt(){for(const r of active)if(r.priority>0&&r.phase==='download'&&!source(r).startsWith('data:')){r.preempted=true;r.controller?.abort();}}
  function stats(group){
   const list=groupIds(group).map(id=>records.get(id)).filter(Boolean);let total=0,done=0;
-  for(const r of list){const weight=r.weight||r.bytes||1;total+=weight;if(r.status==='ready')done+=weight;else if(r.phase==='download'||r.phase==='decode')done+=Math.min(r.bytes||1,r.received||0);}
+  let current=null;
+  for(const r of list){
+   const weight=r.weight||r.bytes||1;total+=weight;
+   if(r.status==='ready'){done+=weight;continue;}
+   if(r.status==='loading')current??=r;
+   const pack=isBundled(r)&&bundles.get(r.bundle);
+   if(pack&&(pack.status==='loading'||pack.status==='ready')){
+    done+=Math.max(0,Math.min(r.bytes,pack.received-r.offset));
+    if(pack.status==='loading'&&r.status==='queued')current??=r;
+   }else if(!pack&&(r.phase==='download'||r.phase==='decode')){
+    done+=Math.min(r.bytes||1,r.received||0);
+   }
+  }
   const complete=(Array.isArray(group)?group:[group]).every(g=>!!M.groups[g])&&list.every(r=>r.status==='ready');
-  return {total,done,percent:complete?100:Math.min(99,Math.floor(100*done/Math.max(1,total))),complete,failed:list.filter(r=>r.status==='error'),current:list.find(r=>r.status==='loading'),count:list.filter(r=>r.status==='ready').length};
+  return {total,done,percent:complete?100:Math.min(99,Math.floor(100*done/Math.max(1,total))),complete,failed:list.filter(r=>r.status==='error'),current,count:list.filter(r=>r.status==='ready').length};
  }
- function retry(group){for(const id of groupIds(group)){const r=records.get(id);if(r?.status==='error'){if(r.readyFlag&&root[r.readyFlag]){r.status='ready';r.phase='ready';r.error=null;continue;}r.status='idle';r.phase='';r.received=0;r.error=null;r.promise=null;r.priority=20;}}}
+ function retry(group){
+  for(const id of groupIds(group)){
+   const r=records.get(id);
+   if(r?.status!=='error')continue;
+   if(r.readyFlag&&root[r.readyFlag]){
+    r.status='ready';r.phase='ready';r.error=null;continue;
+   }
+   const pack=isBundled(r)&&bundles.get(r.bundle);
+   if(pack&&(pack.status==='error'||pack.status==='ready')){
+    pack.status='idle';pack.received=0;pack.error=null;pack.blob=null;
+   }
+   r.status='idle';r.phase='';r.received=0;r.error=null;r.promise=null;r.priority=20;
+  }
+ }
  async function ensure(group,{priority=0}={}){
   const groups=Array.isArray(group)?group:[group];for(const g of groups)if(!M.groups[g])throw Error('找不到场景资源：'+g);
   if(priority===0){foreground++;for(const id of groupIds(group)){const r=records.get(id);if(r)r.priority=0;}preempt();}
@@ -134,7 +256,7 @@
  function makeOverlay(){
   if(overlay)return overlay;
   overlay=doc.getElementById('game-initial-loading')||doc.createElement('section');overlay.className='scene-loader';overlay.hidden=true;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','场景资源准备');
-  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true"><div class="scene-load-row"></div><div class="scene-load-row"></div></div><div class="scene-load-card"><div class="scene-load-progress"><h2 data-load-title><span></span></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-label="资源准备进度" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><p class="scene-load-duration" data-load-duration>准备好后会自动进入；接星星不影响加载进度。</p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div><div class="load-play"></div></div>';
+  overlay.innerHTML='<div class="scene-load-pattern" aria-hidden="true"><div class="scene-load-row"></div><div class="scene-load-row"></div></div><div class="scene-load-card"><div class="scene-load-progress"><h2 data-load-title><span></span></h2><div class="scene-load-battery" aria-hidden="true">'+Array.from({length:10},()=>'<span class="scene-load-cell"><i></i></span>').join('')+'</div><p class="scene-load-percent" role="progressbar" aria-label="资源准备进度" aria-valuemin="0" aria-valuemax="100" data-load-percent></p><p class="scene-load-status" role="status" aria-live="polite" data-load-status></p><p class="scene-load-duration" data-load-duration>加载大概需要1分钟</p><div class="scene-load-actions" hidden><button type="button" data-load-retry>重试</button><button type="button" class="scene-load-back" data-load-back>返回封面</button></div></div><div class="load-play"></div></div>';
   overlay.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Tab'){const buttons=[...overlay.querySelectorAll('button,[tabindex="0"]')].filter(b=>!b.closest('[hidden]')&&!b.disabled);if(!buttons.length){e.preventDefault();return;}if(e.shiftKey&&doc.activeElement===buttons[0]){e.preventDefault();buttons.at(-1).focus({preventScroll:true});}else if(!e.shiftKey&&doc.activeElement===buttons.at(-1)){e.preventDefault();buttons[0].focus({preventScroll:true});}}});
   doc.getElementById('app').appendChild(overlay);
   loadingPlay=root.GameLoadingPlay?.create(overlay.querySelector('.load-play'));

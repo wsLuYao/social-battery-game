@@ -937,7 +937,7 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 .scene-load-row:nth-child(even){background-position:72px 96px;animation-name:scene-load-right;animation-duration:74s}
 @keyframes scene-load-left{from{transform:translateX(0)}to{transform:translateX(-288px)}}
 @keyframes scene-load-right{from{transform:translateX(-288px)}to{transform:translateX(0)}}
-#app .scene-load-card{position:relative;box-sizing:border-box;width:min(440px,calc(100% - 32px));height:min(515px,calc(100% - 32px));padding:22px 22px 18px;border:3px solid #5d684f;background:#fff6df;box-shadow:5px 5px 0 #bbaa80;text-align:center;display:grid;grid-template-rows:auto minmax(0,1fr);gap:20px;min-width:0}
+#app .scene-load-card{position:relative;box-sizing:border-box;width:min(440px,calc(100% - 32px));height:min(550px,calc(100% - 32px));padding:22px 22px 18px;border:3px solid #5d684f;background:#fff6df;box-shadow:5px 5px 0 #bbaa80;text-align:center;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:20px;min-width:0}
 .scene-load-progress{min-width:0;align-self:center}
 #app .scene-load-card h2{font-size:22px;line-height:30px;margin:0 0 18px;color:#44543c;font-weight:800;white-space:nowrap;min-width:0;container-type:inline-size}
 .scene-load-card h2 > span{display:inline-block;font-size:min(1em,calc((100cqw - 8px) / var(--load-title-units, 1)));vertical-align:top}
@@ -950,14 +950,17 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
 #app .scene-load-status{min-height:36px;margin:0;font-size:12px;line-height:1.5;color:#776e58;overflow-wrap:anywhere}
 #app .scene-load-duration{margin:4px 0 0;font-size:12px;line-height:1.55;color:#657451}
 .scene-load-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.scene-load-actions[hidden]{display:none}
 #app .scene-load-actions button{min-height:44px;min-width:100px;font-size:15px;border:2px solid #788768;background:#e2e9c8;color:#3b5039;padding:8px 12px;box-shadow:2px 2px 0 #d0c3a1}
 #app .scene-load-actions .scene-load-back{background:#fff7e6;color:#71634f;border-color:#b3a283}
-.load-play{min-width:0;min-height:0;cursor:default;border-top:1px dashed #c7bc94;padding-top:16px;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+.load-play{min-width:0;min-height:0;cursor:default;border-top:1px dashed #c7bc94;padding-top:16px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto}
 .load-play-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}
 #app .load-play-heading h3{font-size:17px;line-height:1.4;font-weight:800;margin:0;color:#4d6346}
 .load-play-score{background:#e8ebce;border:1px solid #b7c39b;padding:2px 8px;min-width:52px;font-size:13px;font-weight:700;color:#4d6346;font-variant-numeric:tabular-nums}
 #app .load-play-hint{font-size:12px;line-height:1.5;text-align:left;color:#86765a;margin:0 0 9px}
-.load-play-board{display:block;width:100%;height:100%;min-height:0;border:2px solid #adad82;background:#f1ebd4;box-shadow:inset 0 0 0 3px #faf4de;image-rendering:pixelated;touch-action:none;cursor:ew-resize}
+/* The backing canvas size follows the available grid space. */
+.load-play-stage{position:relative;min-width:0;min-height:0}
+.load-play-board{position:absolute;inset:0;display:block;box-sizing:border-box;width:100%;height:100%;border:2px solid #adad82;background:#f1ebd4;box-shadow:inset 0 0 0 3px #faf4de;image-rendering:pixelated;touch-action:none;cursor:ew-resize}
 .load-play-controls{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;gap:8px;align-items:center;margin-top:9px}
 #app .load-play-controls button{display:grid;place-items:center;min-height:44px;border:2px solid #788768;border-bottom-width:4px;background:#e6ebd0;color:#425c3b;font-size:23px;line-height:1;padding:0;touch-action:manipulation}
 #app .load-play-controls button:active{transform:translateY(2px);border-bottom-width:2px}
@@ -1000,12 +1003,23 @@ body *{scrollbar-width:thin!important;scrollbar-color:var(--scroll-thumb) var(--
   .load-play-controls{margin-top:5px}
 }
 @container loading (max-height:398px) and (max-aspect-ratio:6/5){
-  #app .scene-load-duration,#app .load-play-hint{display:none}
+  #app .load-play-hint{display:none}
   .load-play{grid-template-rows:auto minmax(0,1fr) auto}
   .scene-load-actions{margin-top:5px}
+  .has-load-error .scene-load-progress:has([data-load-back][hidden]){display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:8px}
+  .has-load-error .scene-load-progress:has([data-load-back][hidden]) > :is(h2,.scene-load-battery,.scene-load-percent,.scene-load-status){grid-column:1/-1}
+}
+@container loading (max-height:359px) and (max-aspect-ratio:6/5){
+  #app .scene-load-card{padding:8px 10px;gap:6px}
+  #app .scene-load-card h2{line-height:21px;margin-bottom:5px}
+  #app .scene-load-percent{font-size:16px;margin-bottom:2px}
+  #app .scene-load-status{min-height:14px;font-size:11px;line-height:1.3}
+  .scene-load-battery{height:24px;margin-bottom:5px}
+  .scene-load-battery:after{height:12px;top:3px}
+  .load-play{padding-top:5px}
+  .load-play-heading{margin-bottom:3px}
 }
 @container loading (max-height:300px) and (min-width:480px) and (min-aspect-ratio:6/5){
-  #app .scene-load-duration{display:none}
   .scene-load-actions{margin-top:5px}
   .scene-load-battery{height:34px;margin-bottom:8px}
   .scene-load-battery:after{top:4px;height:20px}
