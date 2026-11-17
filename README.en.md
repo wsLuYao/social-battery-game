@@ -12,7 +12,7 @@
 
 ![Character selection and title screen](docs/screenshots/cover.jpg)
 
-**Current release: [v25 · 2026-11-18](version.json)**
+**Current release: [v26 · 2026-11-18](version.json)**
 
 ## What you can do
 
@@ -41,7 +41,7 @@ Open **[the online game](https://wsluyao.github.io/social-battery-game/)**. No a
 
 ![Campus gathering](docs/screenshots/party.jpg)
 
-While assets load, move the box with the arrow keys, on-screen buttons, or by dragging to catch falling stars. The score stays on the loading screen.
+While assets load, move the box with the arrow keys, on-screen buttons, or by dragging to catch falling stars. The cover appears once the opening scenes are ready. Room, ending, and receipt assets continue loading in the background, with progress shown on the room transition if needed. The score stays on the loading screen.
 
 ## Psychology in the design
 
@@ -66,19 +66,19 @@ The recharge guide includes a pixel-printer sequence with soft printing audio. I
 
 Sharing adapts to the device: system image sharing, in-app guidance, image saving, or copied links and captions. Sending is confirmed by the player; browser saves are not embedded in shared links. Personal, non-commercial sharing of your own game-generated receipts is permitted under [COPYRIGHT.md](COPYRIGHT.md), without permission to extract assets, redistribute the game, or redeploy it.
 
-Both examples below were produced by the **v25 game receipt renderer** from the same sample records, using the advance-planning cat character.
+Both examples below were produced by the **v26 game receipt renderer** from the same sample records, using the advance-planning cat character.
 
 **Square receipt · 1200×1200**
 
 A slim printer sits above the wide ticket. This is the default format for native image sharing and long-press saving.
 
-![v25 square receipt example](docs/screenshots/receipt-square-v25.png)
+![v26 square receipt example](docs/screenshots/receipt-square-v26.png)
 
 **Landscape receipt · 2000×1040**
 
 The full printer sits beside the horizontal ticket. Choose this format in the save panel, preview the image, then confirm the download.
 
-![v25 landscape receipt example](docs/screenshots/receipt-landscape-v25.png)
+![v26 landscape receipt example](docs/screenshots/receipt-landscape-v26.png)
 
 ## Run locally
 
@@ -95,7 +95,7 @@ Open [http://localhost:8000](http://localhost:8000). Serve the files over HTTP s
 ## How it works
 
 - HTML, CSS, and vanilla JavaScript combine Canvas scenes with DOM interfaces.
-- Images, audio, and fonts are stored in 13 scene packs. Of the images, 538 are stored in 37 atlases and restored to their original dimensions at load time.
+- Images, audio, and fonts are stored in 10 scene packs. Of the images, 86 share four atlases and are drawn using their rectangle and scale metadata. Other images retain standalone compressed data.
 - Progress, settings, and gallery unlocks use browser LocalStorage. There is no account system or cloud synchronization.
 - Sharing and image export are initiated by the player. The receipt's QR code links to the deployed game.
 
@@ -114,7 +114,7 @@ tools/validate.mjs      Static release validation
 .nojekyll               GitHub Pages static publishing marker
 ```
 
-The current release is **v25 · November 18, 2026**, based on the 30MB medium-quality GitHub Pages atlas build. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
+The current release is **v26 · November 18, 2026**, based on the low-quality GitHub Pages build with staged loading. The JavaScript runtime is a combined release file; the original project's offline-package build tools are not included.
 
 ## Validate and deploy
 

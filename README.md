@@ -7,7 +7,7 @@
   <a href="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml"><img alt="静态验证" src="https://github.com/wsLuYao/social-battery-game/actions/workflows/validate.yml/badge.svg"></a>
   <img alt="HTML · CSS · JavaScript" src="https://img.shields.io/badge/Web-HTML%20%2F%20CSS%20%2F%20JS-c7a15c">
   <img alt="存档保存在浏览器" src="https://img.shields.io/badge/Save-LocalStorage-8f83ad">
-  <img alt="当前版本 v25" src="https://img.shields.io/badge/Release-v25-d7947d">
+  <img alt="当前版本 v26" src="https://img.shields.io/badge/Release-v26-d7947d">
   <p><strong>聚会可以尽兴，离场可以从容，独处也可以好好充电。</strong></p>
   <p><a href="https://wsluyao.github.io/social-battery-game/">立即游玩</a> · <a href="#它能做什么">玩法介绍</a> · <a href="docs/deployment.md">部署说明</a></p>
 </div>
@@ -18,7 +18,7 @@
 
 ![游戏封面与角色选择](docs/screenshots/cover.jpg)
 
-**当前版本：[v25 · 2026-11-18](version.json)**
+**当前版本：[v26 · 2026-11-18](version.json)**
 
 ## 它能做什么
 
@@ -43,7 +43,7 @@
 
 - **电脑**：使用方向键或 WASD 移动，也可以点击场景移动；靠近互动点后按页面提示操作。
 - **手机**：建议横屏，使用触屏移动与互动；竖屏时可选择“进入横屏模式”。
-- **首次进入**：载入资源时可以玩「接住小星光」，用方向键、屏幕按钮或拖动移动小盒子。资源就绪后进入封面，接星数量独立于主游戏存档。
+- **首次进入**：载入资源时可以玩「接住小星光」，用方向键、屏幕按钮或拖动移动小盒子。封面与前半程资源就绪后进入封面，后半程资源继续在后台下载，接星数量独立于主游戏存档。
 - **再次进入**：在同一浏览器、同一网址下选择继续游玩。
 
 ## 这一晚怎么展开
@@ -125,19 +125,19 @@ flowchart LR
 - **保存一致的画面**：横向出票预览保留打印机演出；保存面板提供 1200×1200 方形和 2000×1040 长方形两种 PNG。方形采用顶部窄条打印机与宽票面，长方形保留侧边打印机与横向出纸构图。系统图片分享与长按保存默认采用方形。
 - **邀请朋友来体验**：票据附游戏二维码；分享入口提供微信、朋友圈、QQ、QQ 空间及链接等路径，并根据设备能力提供系统图片分享、保存图片或复制文案与链接。
 
-以下两张图片均由 **v25 实际小票渲染器**使用同一组游戏示例记录生成。示例角色为“提前预约型充电猫”，展示相同的离场电量与当晚印记，便于比较两种构图。
+以下两张图片均由 **v26 实际小票渲染器**使用同一组游戏示例记录生成。示例角色为“提前预约型充电猫”，展示相同的离场电量与当晚印记，便于比较两种构图。
 
 **方形小票 · 1200×1200**
 
 顶部窄条像素打印机连接宽票面，适合手机相册和方形图片分享。系统图片分享与长按保存默认使用此格式。
 
-![v25 方形小票示例，1200×1200](docs/screenshots/receipt-square-v25.png)
+![v26 方形小票示例，1200×1200](docs/screenshots/receipt-square-v26.png)
 
 **长方形小票 · 2000×1040**
 
 左侧完整像素打印机连接横向票据，保留出票演出的构图，适合横屏展示。保存面板可切换到此格式，预览后确认下载。
 
-![v25 长方形小票示例，2000×1040](docs/screenshots/receipt-landscape-v25.png)
+![v26 长方形小票示例，2000×1040](docs/screenshots/receipt-landscape-v26.png)
 
 小票从本局数据到分享的过程：
 
@@ -180,7 +180,7 @@ python -m http.server 8000
 ## 工作方式与数据
 
 - **页面**：HTML、CSS 与原生 JavaScript，结合 Canvas 场景和页面交互层。
-- **资源**：图片、音频和字体合并为 13 个场景资源包，由资源清单统一加载。其中 538 张图片合并为 37 张图集，保留原分辨率，加载后按矩形还原。图像采用 WebP 等格式，音频采用 MP3。
+- **资源**：图片、音频和字体合并为 10 个场景资源包。其中 86 张图片共用 4 张图集，绘制时读取对应矩形与缩放信息；其余图片保留独立压缩数据。图像采用 WebP 等格式，音频采用 MP3。
 - **存档**：进度、设置与图鉴保存在当前浏览器的 LocalStorage，没有账号或云端同步。
 - **分享**：玩家主动保存图片、复制文案或选择分享入口；小票二维码指向在线游戏。
 
@@ -203,7 +203,7 @@ python -m http.server 8000
 └── .nojekyll                  # GitHub Pages 静态发布标记
 ```
 
-当前版本为 **v25 · 2026-11-18**，基于 GitHub Pages 30MB 中画质图集版，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
+当前版本为 **v26 · 2026-11-18**，基于 GitHub Pages 低画质分段加载版，保留其游戏流程与美术资源。运行脚本是发布时合并的文件；本仓库不包含原工程中生成离线包的构建工具。
 
 ## 验证与部署
 

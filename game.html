@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-game-boot="loading">
 
 <head>
-    <meta name="application-version" content="v25">
+    <meta name="application-version" content="v26">
     <link rel="canonical" href="https://wsluyao.github.io/social-battery-game/">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -17,24 +17,80 @@
     </style>
     <script>
     (function(){
-        var failed=false,timer=setTimeout(function(){window.GameStartupError();},32000);
-        window.GameStartupReady=function(){clearTimeout(timer);};
-        window.GameStartupError=function(){
-            failed=true;clearTimeout(timer);
+        var running=false,position=0,tasks=[],started=false;
+        window.GameStartupReady=function(){started=true;document.getElementById('game-entry-error')?.remove();};
+        window.GameStartupError=function(message,retry){
             var show=function(){
                 if(document.getElementById('game-entry-error'))return;
                 var host=document.getElementById('app')||document.body;if(!host)return;
                 var box=document.createElement('section');box.id='game-entry-error';box.setAttribute('role','alertdialog');box.setAttribute('aria-label','游戏启动未完成');
                 box.style.cssText='position:absolute;inset:0;z-index:10001;display:grid;place-items:center;background:#e9deb8;color:#44543c;padding:20px;text-align:center;touch-action:none';
                 box.innerHTML='<div style="max-width:420px;padding:24px;border:3px solid #5d684f;background:#fff6df;box-shadow:5px 5px #bbaa80"><h2 style="margin:0 0 12px;font-size:22px">游戏启动还未完成</h2><p style="font-size:15px;line-height:1.7">连接中断或启动文件未能载入。请检查网络后重新加载。</p><button type="button" style="padding:10px 24px;min-height:44px;border:2px solid #788768;background:#e2e9c8;color:#3b5039;font-size:16px">重新加载</button></div>';
-                box.querySelector('button').onclick=function(){location.reload();};host.appendChild(box);box.querySelector('button').focus({preventScroll:true});
+                if(message)box.querySelector('p').textContent=message;
+                var button=box.querySelector('button');if(retry)button.textContent='重试';
+                button.onclick=function(){if(!retry)return location.reload();button.disabled=true;box.remove();retry();};host.appendChild(box);button.focus({preventScroll:true});
             };
             if(document.getElementById('app'))show();else document.addEventListener('DOMContentLoaded',show,{once:true});
         };
-        window.addEventListener('error',function(e){if(e.filename&&/\/(manifest|resource-loader|interaction-guard|bootstrap)\.js/.test(e.filename))window.GameStartupError();});
+        var wait=function(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});};
+        function status(text){var el=document.querySelector('#game-initial-loading .scene-load-status');if(el)el.textContent=text;}
+        async function fetchScript(task){
+            if(task.blob)return task.blob;
+            if(task.error)throw task.error;
+            if(task.pending)return task.pending;
+            task.pending=(async function(){
+                for(var attempt=0;attempt<3;attempt++){
+                    var controller=new AbortController(),timer,timedOut=false;
+                    var pulse=function(){clearTimeout(timer);timer=setTimeout(function(){timedOut=true;controller.abort();},32000);};
+                    pulse();
+                    try{
+                        task.attempt=(task.attempt||0)+1;
+                        var response=await fetch(task.url,{signal:controller.signal,cache:task.attempt>1?'reload':'force-cache',credentials:'same-origin'});
+                        if(!response.ok)throw Object.assign(Error('启动文件请求失败'),{http:response.status});
+                        pulse();var blob;
+                        if(response.body?.getReader){
+                            var reader=response.body.getReader(),chunks=[];
+                            for(;;){var chunk=await reader.read();if(chunk.done)break;chunks.push(chunk.value);pulse();}
+                            blob=new Blob(chunks,{type:'text/javascript'});
+                        }else blob=new Blob([await response.arrayBuffer()],{type:'text/javascript'});
+                        if(controller.signal.aborted)throw Error('连接超时');
+                        task.blob=blob;return blob;
+                    }catch(error){
+                        var retryable=!error.http||error.http===408||error.http===429||error.http>=500;
+                        if(attempt===2||!retryable)throw Object.assign(error,{network:true});
+                        status(timedOut?'连接较慢，正在自动重试…':'连接暂时中断，正在自动重试…');
+                    }finally{clearTimeout(timer);}
+                    await wait(700*(attempt+1));
+                }
+            })();
+            try{return await task.pending;}catch(error){task.error=error;throw error;}finally{task.pending=null;}
+        }
+        async function execute(blob){
+            var url=URL.createObjectURL(blob),el=document.createElement('script'),failure;
+            var capture=function(event){if(event.filename===url)failure=event.error||Error('启动代码无法执行');};
+            window.addEventListener('error',capture);
+            try{await new Promise(function(resolve,reject){
+                el.onload=function(){failure?reject(failure):resolve();};el.onerror=function(){reject(Error('启动代码无法执行'));};el.src=url;document.head.appendChild(el);
+            });}finally{window.removeEventListener('error',capture);el.onload=el.onerror=null;el.remove();URL.revokeObjectURL(url);}
+        }
+        window.GameStartupLoad=async function(urls){
+            if(running||started)return;
+            if(!tasks.length)tasks=(urls||[]).map(function(url){return {url:url};});
+            if(!tasks.length)return;
+            running=true;
+            tasks.slice(position).forEach(function(task){task.error=null;});
+            // Fetch independent startup files together, then execute in dependency order.
+            tasks.slice(position).forEach(function(task){fetchScript(task).catch(function(){});});
+            try{
+                while(position<tasks.length){await execute(await fetchScript(tasks[position]));position++;}
+                if(!started)throw Error('游戏入口未能初始化');
+            }catch(error){
+                window.GameStartupError(error.network?'启动文件暂时未能下载。重试会保留已经准备好的部分。':'启动代码未能完成，请重新加载。',error.network?function(){window.GameStartupLoad();}:null);
+            }finally{running=false;}
+        };
     })();
     </script>
-    <link rel="stylesheet" href="src/runtime/cover.css?v=20261118-v25" onerror="GameStartupError()">
+    <link rel="stylesheet" href="src/runtime/cover.css?v=20261118-v26" onerror="GameStartupError()">
 </head>
 
 <body>
@@ -196,6 +252,11 @@
                 <div class="transition-content"><small id="transitionSub"></small>
                     <h2 id="transitionTitle"></h2>
                     <p id="transitionText"></p>
+                    <div id="roomLoadProgress" hidden>
+                        <span role="status">房间资源准备</span>
+                        <progress max="100" value="0" aria-label="房间资源准备"></progress>
+                        <button type="button" class="primary" hidden>重试</button>
+                    </div>
                     <div class="transition-meter"><span>今晚电量</span>
                         <div class="large-battery"><i id="transitionFill"></i></div><b id="transitionPercent"
                             class="transition-percent">88%</b>
@@ -214,10 +275,11 @@
         <audio id="bgmLateSnack" loop preload="none" hidden></audio>
     </main>
     <script>window.SOCIAL_BATTERY_SHARE_QR={"url":"https://wsluyao.github.io/social-battery-game/","rows":["00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00001111111000111100111111010011111110000","00001000001001000111110011100010000010000","00001011101010111100011011101010111010000","00001011101010001011100010011010111010000","00001011101010110101001001010010111010000","00001000001010101001111011000010000010000","00001111111010101010101010101011111110000","00000000000011011011001001100000000000000","00001011111000011111011010110011111000000","00000011010111000000101110010011011010000","00001001011000010001101000100000101100000","00000010000110101010100001100010111100000","00000101101111101000001101001100110110000","00001001100101000111110010010110001110000","00000101011001110000010100100110000100000","00001111010110111000101111101110011000000","00000001111001011100010100000101100010000","00000011010101110010111110010111011010000","00000111011100101011110000101011101000000","00000000110100101000011010000101111000000","00000101101111111111100011111001110110000","00001111010000100111011000010010001010000","00001001111111011101101010100101011100000","00001000000000010101000001010110011010000","00001011101010111101110010101111110110000","00000000000011100100101111001000101010000","00001111111000011111101011011010101100000","00001000001010000000100001111000111100000","00001011101011110100001101001111110000000","00001011101011010001110011110100111010000","00001011101010100000010100101111001000000","00001000001000100010100111100110111000000","00001111111011100100011100111101010100000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000"]};window.REPORT_SHARE_URL=window.SOCIAL_BATTERY_SHARE_QR.url;</script>
-    <script src="src/runtime/manifest.js?v=20261118-v25" onerror="GameStartupError()"></script>
-    <script src="src/js/loading-play.js?v=20261118-v25"></script>
-    <script src="src/js/resource-loader.js?v=20261118-v25" onerror="GameStartupError()"></script>
-    <script src="src/js/interaction-guard.js?v=20261118-v25" onerror="GameStartupError()"></script>
-    <script src="src/js/bootstrap.js?v=20261118-v25" onerror="GameStartupError()"></script>
+    <script src="src/runtime/manifest.js?v=20261118-v26" type="application/x-game-startup"></script>
+    <script src="src/js/loading-play.js?v=20261118-v26" type="application/x-game-startup"></script>
+    <script src="src/js/resource-loader.js?v=20261118-v26" type="application/x-game-startup"></script>
+    <script src="src/js/interaction-guard.js?v=20261118-v26" type="application/x-game-startup"></script>
+    <script src="src/js/bootstrap.js?v=20261118-v26" type="application/x-game-startup"></script>
+    <script>GameStartupLoad(Array.from(document.querySelectorAll('script[type="application/x-game-startup"]'),function(el){return el.src;}));</script>
 </body>
 </html>

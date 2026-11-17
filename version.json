@@ -1,6 +1,6 @@
 {
-  "version": "v25",
+  "version": "v26",
   "release_date": "2026-11-18",
-  "build": "20261118-v25",
-  "description": "GitHub Pages 30MB 中画质图集版"
+  "build": "20261118-v26",
+  "description": "GitHub Pages 低画质分段加载版"
 }

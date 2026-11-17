@@ -27,6 +27,24 @@
  const ready=group=>(Array.isArray(group)?group:[group]).every(g=>!!M.groups[g])&&groupIds(group).every(id=>records.get(id)?.status==='ready');
  function resolve(url){const r=record(url);return r?(r.objectURL||(r.status==='error'?empty:r.url)):url;}
  function image(url){const r=record(url);if(!r){const i=new root.Image();i.src=url;return i;}return r.image||(r.image=new root.Image());}
+ function drawImage(ctx,img,...args){
+  const r=decodedImages.get(img),sheet=r?.atlas&&atlases.get(r.atlas);
+  if(!sheet)return ctx.drawImage(img,...args);
+  if(!sheet.image||r.status!=='ready')return;
+  let sx=0,sy=0,sw=r.width,sh=r.height,dx,dy,dw=sw,dh=sh;
+  if(args.length===2)[dx,dy]=args;
+  else if(args.length===4)[dx,dy,dw,dh]=args;
+  else if(args.length===8)[sx,sy,sw,sh,dx,dy,dw,dh]=args;
+  else throw new TypeError('Invalid image drawing arguments');
+  if(![sx,sy,sw,sh,dx,dy,dw,dh].every(Number.isFinite)||!sw||!sh||!dw||!dh)return;
+  if(sw<0){sx+=sw;sw=-sw;}if(sh<0){sy+=sh;sh=-sh;}
+  if(dw<0){dx+=dw;dw=-dw;}if(dh<0){dy+=dh;dh=-dh;}
+  // Match native drawImage clipping, without sampling a neighboring sprite.
+  const x=Math.max(0,sx),y=Math.max(0,sy),w=Math.min(r.width,sx+sw)-x,h=Math.min(r.height,sy+sh)-y;
+  if(w<=0||h<=0)return;
+  return ctx.drawImage(sheet.image,r.rect[0]+x,r.rect[1]+y,w,h,
+   dx+(x-sx)*dw/sw,dy+(y-sy)*dh/sh,w*dw/sw,h*dh/sh);
+ }
  const bound=new WeakSet();
  function bindAssets(map){if(!map||typeof map!=='object'||bound.has(map))return;bound.add(map);for(const key of Object.keys(map)){const value=map[key];if(value&&typeof value==='object')bindAssets(value);else if(typeof value==='string'&&record(value))Object.defineProperty(map,key,{enumerable:true,configurable:true,get:()=>resolve(value)});}}
  function source(r){return root.GAME_EMBEDDED_RESOURCES?.[r.id]||r.url;}
@@ -83,9 +101,26 @@
   }
  }
  function timeout(promise,ms,onTimeout){let timer;return Promise.race([promise,new Promise((_,reject)=>timer=setTimeout(()=>{onTimeout?.();reject(Object.assign(Error('连接超时'),{code:'timeout'}));},ms))]).finally(()=>clearTimeout(timer));}
+ const retries=Math.max(0,Math.min(3,M.autoRetries??2));
+ const transient=error=>error?.code==='timeout'||error?.code==='network'||error instanceof TypeError||error?.name==='TypeError'||error?.code==='http'&&(error.status===408||error.status===429||error.status>=500);
+ function pause(ms){return new Promise(ok=>setTimeout(ok,ms));}
+ async function watched(owner,work){
+  let timer;
+  const stalled=new Promise((_,reject)=>{
+   owner.pulse=()=>{clearTimeout(timer);timer=setTimeout(()=>{
+    const error=Object.assign(Error('连接超时'),{code:'timeout'});owner.timedOut=true;owner.controller.abort();reject(error);
+   },M.timeoutMs||32000);};
+  });
+  owner.pulse();
+  try{return await Promise.race([stalled,work()]);}
+  catch(error){if(owner.timedOut)error.code='timeout';throw error;}
+  finally{clearTimeout(timer);owner.pulse=null;}
+ }
  async function download(input,signal,attempt,mime,onProgress){
   const inline=input.startsWith('data:');
-  const response=await root.fetch(input,inline?{signal}:{signal,cache:attempt>1?'reload':'force-cache',credentials:'same-origin'});
+  let response;
+  try{response=await root.fetch(input,inline?{signal}:{signal,cache:attempt>1?'reload':'force-cache',credentials:'same-origin'});}
+  catch(error){if(!signal.aborted)error.code='network';throw error;}
   if(!response.ok)throw Object.assign(Error('资源请求失败'),{code:'http',status:response.status});
   onProgress(0);
   if(inline||!response.body?.getReader){
@@ -105,33 +140,25 @@
   return new Blob(chunks,{type:mime});
  }
  async function runBundle(pack){
-  const controller=new AbortController();
-  let timer,resetTimer;
-  const stalled=new Promise((_,reject)=>{
-   resetTimer=()=>{
-    clearTimeout(timer);
-    timer=setTimeout(()=>{
-     controller.abort();reject(Object.assign(Error('资源包连接超时'),{code:'timeout'}));
-    },M.timeoutMs||32000);
-   };
-  });
-  pack.attempt++;pack.received=0;pack.error=null;resetTimer();changed();
   try{
-   const blob=await Promise.race([stalled,download(
-    pack.url,controller.signal,pack.attempt,'application/octet-stream',received=>{
-     if(controller.signal.aborted)return;
-     resetTimer();pack.received=received;
-     // Many chunks can arrive in one frame. The loader only needs one repaint.
-     const now=Date.now();
-     if(now-lastBundleUpdate>=60){lastBundleUpdate=now;changed();}
+   for(let retryNo=0;;retryNo++){
+    pack.controller=new AbortController();pack.timedOut=false;
+    pack.attempt++;pack.received=0;pack.error=null;pack.retryCount=0;changed();
+    try{
+     const blob=await watched(pack,()=>download(pack.url,pack.controller.signal,pack.attempt,'application/octet-stream',received=>{
+      pack.pulse?.();pack.received=received;
+      const now=Date.now();if(now-lastBundleUpdate>=60){lastBundleUpdate=now;changed();}
+     }));
+     if(blob.size!==pack.bytes)throw Object.assign(Error('资源包不完整'),{code:'decode'});
+     pack.received=pack.bytes;pack.blob=blob;pack.status='ready';break;
+    }catch(error){
+     if(!transient(error)||retryNo>=retries)throw error;
+     pack.retryCount=retryNo+1;changed();await pause((M.retryDelayMs??700)*(retryNo+1));
     }
-   )]);
-   if(blob.size!==pack.bytes)throw Object.assign(Error('资源包不完整'),{code:'decode'});
-   pack.received=pack.bytes;pack.blob=blob;pack.status='ready';
+   }
   }catch(error){
    pack.error=error;pack.status='error';
-   // Settle every waiting consumer in the same turn. Otherwise an immediate
-   // retry can reset the pack while later consumers still report its old error.
+   // Fail every waiting consumer together before exposing manual Retry.
    for(const r of pack.members){
     if(r.status!=='queued'||!isBundled(r))continue;
     r.status='error';r.phase='error';
@@ -139,9 +166,31 @@
     r.bad?.(r.error);
    }
    for(let i=queue.length-1;i>=0;i--)if(queue[i].status==='error')queue.splice(i,1);
-  }finally{
-   clearTimeout(timer);activeBundles.delete(pack);changed();pump();
-  }
+  }finally{pack.controller=null;activeBundles.delete(pack);changed();pump();}
+ }
+ async function atlasPixels(r){
+  const sheet=atlases.get(r.atlas),pack=bundles.get(r.bundle),rect=r.rect,signal=r.controller.signal;
+  if(!sheet||!pack?.blob||!Array.isArray(rect)||rect.length!==4||
+     rect.some(n=>!Number.isSafeInteger(n)||n<0)||rect[2]!==r.width||rect[3]!==r.height||
+     rect[0]+rect[2]>sheet.width||rect[1]+rect[3]>sheet.height||
+     sheet.offset<0||sheet.offset+sheet.bytes>pack.blob.size)
+   throw Object.assign(Error('图集裁切信息不完整'),{code:'decode'});
+  r.phase='decode';r.received=r.bytes;r.pulse?.();
+  if(!sheet.promise)sheet.promise=(async()=>{
+   const url=URL.createObjectURL(pack.blob.slice(sheet.offset,sheet.offset+sheet.bytes,sheet.mime));
+   const img=new root.Image();img.decoding='async';
+   try{
+    await new Promise((ok,bad)=>{img.onload=ok;img.onerror=()=>bad(Object.assign(Error('图集无法打开'),{code:'decode'}));img.src=url;});
+    if(img.decode)await img.decode();
+    if(img.naturalWidth!==sheet.width||img.naturalHeight!==sheet.height)throw Object.assign(Error('图集尺寸不完整'),{code:'decode'});
+    sheet.image=img;return img;
+   }finally{img.onload=img.onerror=null;URL.revokeObjectURL(url);}
+  })();
+  await sheet.promise;if(signal.aborted)throw Error('准备已中断');
+  // A view keeps the original dimensions but shares the decoded sheet pixels.
+  // Only drawImage consumes these views; DOM images keep standalone encoded bytes.
+  const view=Object.freeze({src:r.url,complete:true,naturalWidth:r.width,naturalHeight:r.height,width:r.width,height:r.height});
+  decodedImages.set(view,r);r.image=view;
  }
  async function binary(r){
   const input=source(r),signal=r.controller.signal;r.phase='download';
@@ -151,33 +200,6 @@
     const {message,code,status}=pack.error;
     throw Object.assign(Error(message),{code,status});
    }
-   if(r.atlas){
-    const sheet=atlases.get(r.atlas),rect=r.rect;
-    if(!sheet||!pack?.blob||!Array.isArray(rect)||rect.length!==4||
-       rect.some(n=>!Number.isSafeInteger(n)||n<0)||rect[2]!==r.width||rect[3]!==r.height||
-       rect[0]+rect[2]>sheet.width||rect[1]+rect[3]>sheet.height||
-       sheet.offset<0||sheet.offset+sheet.bytes>pack.blob.size)
-     throw Object.assign(Error('图集裁切信息不完整'),{code:'decode'});
-    r.phase='decode';r.received=r.bytes;
-    if(!sheet.promise)sheet.promise=(async()=>{
-     const url=URL.createObjectURL(pack.blob.slice(sheet.offset,sheet.offset+sheet.bytes,sheet.mime));
-     const img=new root.Image();img.decoding='async';
-     try{
-      await new Promise((ok,bad)=>{img.onload=ok;img.onerror=()=>bad(Object.assign(Error('图集无法打开'),{code:'decode'}));img.src=url;});
-      if(img.decode)await img.decode();
-      if(img.naturalWidth!==sheet.width||img.naturalHeight!==sheet.height)throw Object.assign(Error('图集尺寸不完整'),{code:'decode'});
-      sheet.image=img;return img;
-     }finally{img.onload=img.onerror=null;URL.revokeObjectURL(url);}
-    })();
-    const img=await sheet.promise;
-    if(signal.aborted)throw Error('准备已中断');
-    const canvas=doc.createElement('canvas');canvas.width=r.width;canvas.height=r.height;
-    const context=canvas.getContext('2d');context.imageSmoothingEnabled=false;
-    // Restore the complete original rectangle before any existing game cropping.
-    context.drawImage(img,...rect,0,0,r.width,r.height);
-    try{return await new Promise((ok,bad)=>canvas.toBlob(blob=>blob?ok(blob):bad(Object.assign(Error('图集展开失败'),{code:'decode'})),'image/png'));}
-    finally{canvas.width=canvas.height=1;}
-   }
    if(!pack?.blob||!Number.isSafeInteger(r.offset)||r.offset<0||
       !Number.isSafeInteger(r.bytes)||r.bytes<=0||r.offset+r.bytes>pack.blob.size){
     throw Object.assign(Error('资源包索引不完整'),{code:'decode'});
@@ -185,7 +207,7 @@
    r.received=r.bytes;
    return pack.blob.slice(r.offset,r.offset+r.bytes,r.mime);
   }
-  const blob=await download(input,signal,r.attempt,r.mime,n=>{if(n){r.received=n;changed();}});
+  const blob=await download(input,signal,r.attempt,r.mime,n=>{r.pulse?.();if(n){r.received=n;changed();}});
   r.received=r.bytes;return blob;
  }
  async function pixels(r,blob){
@@ -200,19 +222,22 @@
  }
  async function code(r){
   if(r.readyFlag&&root[r.readyFlag])return;
-  r.phase=r.type==='style'?'style':'script';changed();
-  let input=r.url;
+  let input=r.url,revoke=false;
   const embedded=root.GAME_EMBEDDED_CODE?.[r.id];
-  if(embedded)input=URL.createObjectURL(new Blob([embedded],{type:r.type==='style'?'text/css':'text/javascript'}));
-  else if(r.attempt>1)input+=(input.includes('?')?'&':'?')+'retry='+r.attempt;
-  await new Promise((ok,bad)=>{const signal=r.controller.signal,el=doc.createElement(r.type==='style'?'link':'script');r.element=el;
+  if(embedded){input=URL.createObjectURL(new Blob([embedded],{type:r.type==='style'?'text/css':'text/javascript'}));revoke=true;}
+  else if(r.type==='script'){
+   // Fetch incrementally so a slow but progressing script does not time out.
+   const blob=await binary(r);input=URL.createObjectURL(new Blob([blob],{type:'text/javascript'}));revoke=true;
+  }else if(r.attempt>1)input+=(input.includes('?')?'&':'?')+'retry='+r.attempt;
+  r.phase=r.type==='style'?'style':'script';r.pulse?.();changed();
+  try{await new Promise((ok,bad)=>{const signal=r.controller.signal,el=doc.createElement(r.type==='style'?'link':'script');r.element=el;
    if(r.type==='style'){el.rel='stylesheet';el.href=input;}else{el.async=false;el.src=input;}
    const clean=()=>{el.onload=el.onerror=null;signal.removeEventListener('abort',abort);};
    const abort=()=>{clean();el.remove();bad(Error('准备已中断'));};
-   el.onload=()=>{clean();r.readyFlag&&!root[r.readyFlag]?bad(Error('游戏代码未能初始化，请重试')):ok();};el.onerror=()=>{clean();bad(Error('界面代码未能载入'));};
-   signal.addEventListener('abort',abort,{once:true});
-   doc.head.appendChild(el);
-  });
+   el.onload=()=>{clean();r.readyFlag&&!root[r.readyFlag]?bad(Object.assign(Error('游戏代码未能初始化，请重试'),{code:'initialization'})):ok();};
+   el.onerror=()=>{clean();bad(Object.assign(Error('界面代码未能载入'),{code:revoke?'initialization':'network'}));};
+   signal.addEventListener('abort',abort,{once:true});doc.head.appendChild(el);
+  });}finally{if(revoke)URL.revokeObjectURL(input);}
   r.received=r.bytes;
  }
  async function font(r,blob){
@@ -237,23 +262,28 @@
   r.objectURL=URL.createObjectURL(blob);urls.set(r.objectURL,r.id);
  }
  async function run(r){
-  r.attempt=(r.attempt||0)+1;r.controller=new AbortController();r.preempted=false;changed();
+  r.preempted=false;changed();
   try{
    for(const dep of r.deps||[])await task(records.get(dep),r.priority);
-   await timeout((async()=>{
-    if(r.type==='script'||r.type==='style')await code(r);
-    else{const blob=await binary(r);if(r.type==='image')await pixels(r,blob);else if(r.type==='font')await font(r,blob);else await audio(r,blob);}
-   })(),M.timeoutMs||32000,()=>{r.timedOut=true;r.controller.abort();});
+   for(let retryNo=0;;retryNo++){
+    r.attempt=(r.attempt||0)+1;r.controller=new AbortController();r.timedOut=false;r.retryCount=0;
+    try{
+     await watched(r,async()=>{
+      if(r.type==='script'||r.type==='style')await code(r);
+      else if(r.type==='image'&&r.atlas&&isBundled(r))await atlasPixels(r);
+      else{const blob=await binary(r);r.pulse?.();if(r.type==='image')await pixels(r,blob);else if(r.type==='font')await font(r,blob);else await audio(r,blob);}
+     });break;
+    }catch(error){
+     if(r.preempted||!transient(error)||retryNo>=retries)throw error;
+     r.element?.remove();r.phase='retry';r.retryCount=retryNo+1;changed();await pause((M.retryDelayMs??700)*(retryNo+1));
+     if(r.preempted)throw error;
+    }
+   }
    r.status='ready';r.phase='ready';r.error=null;if(r.cssVar&&r.objectURL)doc.documentElement.style.setProperty(r.cssVar,'url("'+r.objectURL+'")');r.ok?.(r);
   }catch(error){
    if(r.preempted){r.status='queued';r.received=0;r.order=++sequence;queue.push(r);}
-   else{r.status='error';r.phase='error';r.error=Object.assign(error,{resource:r.label||'场景素材',code:r.timedOut?'timeout':error.code||'network'});r.element?.remove();r.bad?.(r.error);}
-  }finally{r.controller=null;r.timedOut=false;active.delete(r);
-   if(r.atlas){
-    const sheet=atlases.get(r.atlas),pack=bundles.get(r.bundle);
-    if(sheet&&!pack?.members.some(a=>a.atlas===r.atlas&&(a.status==='loading'||a.status==='queued'&&!a.parked))){sheet.image=null;sheet.promise=null;}
-   }
-   changed();pump();}
+   else{r.status='error';r.phase='error';r.error=Object.assign(error,{resource:r.label||'场景素材',code:error.code||'network'});r.element?.remove();r.bad?.(r.error);}
+  }finally{r.controller=null;r.timedOut=false;active.delete(r);changed();pump();}
  }
  function preempt(){for(const r of active)if(r.priority>0&&r.phase==='download'&&!source(r).startsWith('data:')){r.preempted=true;r.controller?.abort();}}
  function stats(group){
@@ -341,7 +371,9 @@
   const failed=s.failed[0]||(v.error?{error:v.error}:null);
   el.classList.toggle('has-load-error',!!failed);
   let text=s.complete?'画面已准备好':s.current?(s.current.phase==='decode'?'正在展开':'正在准备')+'「'+s.current.label+'」':'正在等待准备';
-  if(Date.now()-v.lastProgress>8000&&!failed)text='仍在准备'+(s.current?'「'+s.current.label+'」':'场景')+'，网络较慢时可能需要稍等。';
+  const reconnect=s.current?.retryCount||(s.current?.bundle&&bundles.get(s.current.bundle)?.retryCount);
+  if(reconnect&&!failed)text='网络较慢，正在自动重试（'+reconnect+'/'+retries+'）…';
+  if(Date.now()-v.lastProgress>8000&&!failed&&!reconnect)text='仍在准备'+(s.current?'「'+s.current.label+'」':'场景')+'，网络较慢时可能需要稍等。';
   if(failed){const err=failed.error;text=(root.navigator?.onLine===false?'网络已断开，请恢复连接后重试。':err?.code==='timeout'?'连接超时，请重试。':err?.code==='decode'?'画面文件未能打开，请重试。':'素材未能载入，请重试。')+' 已准备好的部分会保留。';}
   el.querySelector('[data-load-status]').textContent=text;
   el.querySelector('.scene-load-actions').hidden=!failed;
@@ -363,6 +395,6 @@
  }
  function gate(groups,run,options={}){const key=options.key||String(groups);if(gates.has(key))return gates.get(key);const p=(async()=>{if(await prepare(groups,options))return run();return false;})();gates.set(key,p);p.finally(()=>gates.delete(key)).catch(()=>{});return p;}
  function hydrate(scope=doc){for(const el of scope.querySelectorAll('[data-game-src]')){const raw=el.dataset.gameSrc,r=record(raw);if(r?.status==='ready'){el.src=resolve(raw);el.removeAttribute('data-game-src');}}}
- root.GameResources={manifest:M,ready,resolve,image,bindAssets,ensure,preload,next,optional,prepare,gate,retry,stats,hydrate,load,record,records};
+ root.GameResources={manifest:M,ready,resolve,image,drawImage,bindAssets,ensure,preload,next,optional,prepare,gate,retry,stats,hydrate,load,record,records};
  if(doc){for(const name of ['click','pointerdown','keydown'])doc.addEventListener(name,e=>{if(view&&!overlay?.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();}},true);}
 })(window);

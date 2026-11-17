@@ -42,9 +42,10 @@
   doc.documentElement.removeAttribute('data-game-boot');
   root.GameRuntime.prepareCover();
  }
- boot.loading=R.prepare('session',{title:'正在准备你的这一晚',immediate:true,forceDisplay:true,allowCancel:false,progressLabel:'资源准备',onReady:finishCover}).then(ok=>{
+ boot.loading=R.prepare('opening',{title:'正在准备你的这一晚',immediate:true,forceDisplay:true,allowCancel:false,progressLabel:'资源准备',onReady:finishCover}).then(ok=>{
   if(!ok)return false;
   boot.ready=true;
+  boot.background=R.preload('later');
   return true;
  });
  root.GameStartupReady?.();

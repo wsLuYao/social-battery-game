@@ -2474,6 +2474,9 @@ h1 em {
     color: #7b6247
 }
 
+#roomLoadProgress { display: grid; justify-items: center; gap: 6px; margin-top: 12px; font-weight: 700; }
+#roomLoadProgress progress { width: min(260px, 85%); height: 14px; accent-color: #78875d; }
+#roomLoadProgress[hidden], #roomLoadProgress button[hidden], #transition .transition-meter[hidden] { display: none; }
 .transition-meter {
     display: flex;
     align-items: center;
